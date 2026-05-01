@@ -31,9 +31,9 @@ namespace platform {
         r.context          = nullptr;
         r.swapChain        = nullptr;
         r.renderTargetView = nullptr;
-        r.clearColor[0] = 0.08f;
-        r.clearColor[1] = 0.09f;
-        r.clearColor[2] = 0.11f;
+        r.clearColor[0] = 1.0f;
+        r.clearColor[1] = 1.0f;
+        r.clearColor[2] = 1.0f;
         r.clearColor[3] = 1.0f;
 
         DXGI_SWAP_CHAIN_DESC desc{};

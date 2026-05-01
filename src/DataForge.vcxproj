@@ -77,7 +77,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>..\headerStaticLibrary\;..\headerStaticLibrary\sourceHeaders\;$(ProjectDir);..\vendor\imgui\;..\vendor\imgui\backends\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>headerStaticLibrary\;headerStaticLibrary\include\;$(ProjectDir);..\vendor\imgui\;..\vendor\imgui\backends\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -94,7 +94,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>..\headerStaticLibrary\;..\headerStaticLibrary\sourceHeaders\;$(ProjectDir);..\vendor\imgui\;..\vendor\imgui\backends\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>headerStaticLibrary\;headerStaticLibrary\include\;$(ProjectDir);..\vendor\imgui\;..\vendor\imgui\backends\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -109,7 +109,7 @@
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>..\headerStaticLibrary\;..\headerStaticLibrary\sourceHeaders\;$(ProjectDir);..\vendor\imgui\;..\vendor\imgui\backends\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>headerStaticLibrary\;headerStaticLibrary\include\;$(ProjectDir);..\vendor\imgui\;..\vendor\imgui\backends\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -126,7 +126,7 @@
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>..\headerStaticLibrary\;..\headerStaticLibrary\sourceHeaders\;$(ProjectDir);..\vendor\imgui\;..\vendor\imgui\backends\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>headerStaticLibrary\;headerStaticLibrary\include\;$(ProjectDir);..\vendor\imgui\;..\vendor\imgui\backends\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -136,6 +136,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ui\startup.cpp" />
     <ClCompile Include="data\date.cpp" />
     <ClCompile Include="data\store.cpp" />
     <ClCompile Include="data\persistence.cpp">
@@ -174,36 +175,37 @@
     <ClCompile Include="..\vendor\imgui\backends\imgui_impl_dx11.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\data\types.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\data\date.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\data\store.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\data\persistence.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\logic\validation.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\logic\tasks.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\logic\sort.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\logic\search.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\logic\recursion.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\logic\persistence.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\logic\benchmark.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\logic\dates.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\ui_state.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\app_shell.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\menu_bar.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\task_tree.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\task_table.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\task_details.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\dialogs.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\stats_panel.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\benchmark_panel.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\status_bar.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\toast.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\theme.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\shortcuts.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\platform\window.h" />
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\platform\renderer.h" />
+    <ClInclude Include="headerStaticLibrary\include\data\types.h" />
+    <ClInclude Include="headerStaticLibrary\include\data\date.h" />
+    <ClInclude Include="headerStaticLibrary\include\data\store.h" />
+    <ClInclude Include="headerStaticLibrary\include\data\persistence.h" />
+    <ClInclude Include="headerStaticLibrary\include\logic\validation.h" />
+    <ClInclude Include="headerStaticLibrary\include\logic\tasks.h" />
+    <ClInclude Include="headerStaticLibrary\include\logic\sort.h" />
+    <ClInclude Include="headerStaticLibrary\include\logic\search.h" />
+    <ClInclude Include="headerStaticLibrary\include\logic\recursion.h" />
+    <ClInclude Include="headerStaticLibrary\include\logic\persistence.h" />
+    <ClInclude Include="headerStaticLibrary\include\logic\benchmark.h" />
+    <ClInclude Include="headerStaticLibrary\include\logic\dates.h" />
+    <ClInclude Include="headerStaticLibrary\include\ui\ui_state.h" />
+    <ClInclude Include="headerStaticLibrary\include\ui\app_shell.h" />
+    <ClInclude Include="headerStaticLibrary\include\ui\menu_bar.h" />
+    <ClInclude Include="headerStaticLibrary\include\ui\task_tree.h" />
+    <ClInclude Include="headerStaticLibrary\include\ui\task_table.h" />
+    <ClInclude Include="headerStaticLibrary\include\ui\task_details.h" />
+    <ClInclude Include="headerStaticLibrary\include\ui\dialogs.h" />
+    <ClInclude Include="headerStaticLibrary\include\ui\stats_panel.h" />
+    <ClInclude Include="headerStaticLibrary\include\ui\benchmark_panel.h" />
+    <ClInclude Include="headerStaticLibrary\include\ui\status_bar.h" />
+    <ClInclude Include="headerStaticLibrary\include\ui\toast.h" />
+    <ClInclude Include="headerStaticLibrary\include\ui\theme.h" />
+    <ClInclude Include="headerStaticLibrary\include\ui\shortcuts.h" />
+    <ClInclude Include="headerStaticLibrary\include\platform\window.h" />
+    <ClInclude Include="headerStaticLibrary\include\platform\renderer.h" />
+    <ClInclude Include="headerStaticLibrary\include\ui\startup.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\headerStaticLibrary\HeaderStaticLibrary.vcxproj">
+    <ProjectReference Include="headerStaticLibrary\HeaderStaticLibrary.vcxproj">
       <Project>{7f0d22c7-b3db-4deb-a450-6466fb115cfc}</Project>
     </ProjectReference>
   </ItemGroup>

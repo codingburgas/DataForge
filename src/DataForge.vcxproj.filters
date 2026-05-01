@@ -19,6 +19,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ui\startup.cpp">        <Filter>ui</Filter>       </ClCompile>
     <ClCompile Include="data\date.cpp">        <Filter>data</Filter>     </ClCompile>
     <ClCompile Include="data\store.cpp">       <Filter>data</Filter>     </ClCompile>
     <ClCompile Include="data\persistence.cpp"> <Filter>data</Filter>     </ClCompile>
@@ -53,32 +54,33 @@
     <ClCompile Include="..\vendor\imgui\backends\imgui_impl_dx11.cpp">  <Filter>vendor\imgui</Filter> </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\data\types.h">       <Filter>data</Filter>  </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\data\date.h">        <Filter>data</Filter>  </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\data\store.h">       <Filter>data</Filter>  </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\data\persistence.h"> <Filter>data</Filter>  </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\logic\validation.h"> <Filter>logic</Filter> </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\logic\tasks.h">      <Filter>logic</Filter> </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\logic\sort.h">       <Filter>logic</Filter> </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\logic\search.h">     <Filter>logic</Filter> </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\logic\recursion.h">  <Filter>logic</Filter> </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\logic\persistence.h"><Filter>logic</Filter> </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\logic\benchmark.h">  <Filter>logic</Filter> </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\logic\dates.h">      <Filter>logic</Filter> </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\ui_state.h">       <Filter>ui</Filter>   </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\app_shell.h">      <Filter>ui</Filter>   </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\menu_bar.h">       <Filter>ui</Filter>   </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\task_tree.h">      <Filter>ui</Filter>   </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\task_table.h">     <Filter>ui</Filter>   </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\task_details.h">   <Filter>ui</Filter>   </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\dialogs.h">        <Filter>ui</Filter>   </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\stats_panel.h">    <Filter>ui</Filter>   </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\benchmark_panel.h"><Filter>ui</Filter>   </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\status_bar.h">     <Filter>ui</Filter>   </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\toast.h">          <Filter>ui</Filter>   </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\theme.h">          <Filter>ui</Filter>   </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\ui\shortcuts.h">      <Filter>ui</Filter>   </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\platform\window.h">   <Filter>platform</Filter> </ClInclude>
-    <ClInclude Include="..\headerStaticLibrary\sourceHeaders\platform\renderer.h"> <Filter>platform</Filter> </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\data\types.h">       <Filter>data</Filter>  </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\data\date.h">        <Filter>data</Filter>  </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\data\store.h">       <Filter>data</Filter>  </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\data\persistence.h"> <Filter>data</Filter>  </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\logic\validation.h"> <Filter>logic</Filter> </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\logic\tasks.h">      <Filter>logic</Filter> </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\logic\sort.h">       <Filter>logic</Filter> </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\logic\search.h">     <Filter>logic</Filter> </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\logic\recursion.h">  <Filter>logic</Filter> </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\logic\persistence.h"><Filter>logic</Filter> </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\logic\benchmark.h">  <Filter>logic</Filter> </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\logic\dates.h">      <Filter>logic</Filter> </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\ui\ui_state.h">       <Filter>ui</Filter>   </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\ui\app_shell.h">      <Filter>ui</Filter>   </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\ui\menu_bar.h">       <Filter>ui</Filter>   </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\ui\task_tree.h">      <Filter>ui</Filter>   </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\ui\task_table.h">     <Filter>ui</Filter>   </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\ui\task_details.h">   <Filter>ui</Filter>   </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\ui\dialogs.h">        <Filter>ui</Filter>   </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\ui\stats_panel.h">    <Filter>ui</Filter>   </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\ui\benchmark_panel.h"><Filter>ui</Filter>   </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\ui\status_bar.h">     <Filter>ui</Filter>   </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\ui\toast.h">          <Filter>ui</Filter>   </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\ui\theme.h">          <Filter>ui</Filter>   </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\ui\shortcuts.h">      <Filter>ui</Filter>   </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\platform\window.h">   <Filter>platform</Filter> </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\platform\renderer.h"> <Filter>platform</Filter> </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\ui\startup.h">           <Filter>ui</Filter>       </ClInclude>
   </ItemGroup>
 </Project>

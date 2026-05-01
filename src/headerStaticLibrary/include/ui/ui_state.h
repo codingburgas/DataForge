@@ -7,6 +7,13 @@
 
 namespace ui {
 
+    enum NavItem {
+        NAV_OVERVIEW = 0,
+        NAV_TASKS = 1,
+        NAV_ANALYTICS = 2,
+        NAV_BENCHMARK = 3
+    };
+
     constexpr int SEARCH_BUF_SIZE   = 256;
     constexpr int TITLE_BUF_SIZE    = 256;
     constexpr int DESC_BUF_SIZE     = 2048;
@@ -65,6 +72,9 @@ namespace ui {
 
         bool        lastValidationOk;
         std::string lastValidationMessage;
+
+        bool    sidebarExpanded;
+        NavItem activeNavItem;
 
         EditBuffers edit;
     };

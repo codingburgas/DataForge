@@ -72,7 +72,7 @@ namespace ui {
         ui.filterStatus   = -1;
 
         ui.sortKey  = logic::SORT_KEY_PRIORITY;
-        ui.sortAlgo = logic::SORT_ALGO_BUBBLE;
+        ui.sortAlgo = logic::SORT_ALGO_QUICK;
 
         ui.showStatsPanel       = false;
         ui.showBenchmarkPanel   = false;
@@ -81,7 +81,7 @@ namespace ui {
         ui.showConfirmDelete    = false;
         ui.showDirtyExitConfirm = false;
 
-        ui.useDarkTheme    = true;
+        ui.useDarkTheme    = false;
         ui.requestedQuit   = false;
         ui.triggeredSave   = false;
         ui.triggeredSaveAs = false;
@@ -96,11 +96,14 @@ namespace ui {
         ui.undoSnapshot     = data::TaskStore{};
         ui.hasUndoSnapshot  = false;
 
-        ui.benchmarkItemCount = 1000;
+        ui.benchmarkItemCount = 2500;
         ui.lastBenchmark.reset();
 
         ui.lastValidationOk = true;
         ui.lastValidationMessage.clear();
+
+        ui.sidebarExpanded = true;
+        ui.activeNavItem   = NAV_OVERVIEW;
 
         clearEditBuffers(ui.edit);
     }

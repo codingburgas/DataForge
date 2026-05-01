@@ -3,6 +3,6 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="HeaderStaticLibrary/HeaderStaticLibrary.vcxproj" Id="7f0d22c7-b3db-4deb-a450-6466fb115cfc" />
+  <Project Path="src/headerStaticLibrary/HeaderStaticLibrary.vcxproj" Id="7f0d22c7-b3db-4deb-a450-6466fb115cfc" />
   <Project Path="src/DataForge.vcxproj" Id="8cf5d64d-1f8c-4a52-b61c-e0dddf644d81" />
 </Solution>
