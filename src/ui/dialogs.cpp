@@ -1,6 +1,7 @@
 #include "ui/dialogs.h"
 #include "ui/theme.h"
 #include "ui/toast.h"
+#include "ui/voice_input.h"
 #include "logic/tasks.h"
 #include "logic/recursion.h"
 #include "logic/dates.h"
@@ -78,14 +79,21 @@ namespace ui {
             ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ColBgActive);
             ImGui::PushStyleColor(ImGuiCol_Border, ColBorder);
 
+            const float micW = 48.0f;
+            const float micGap = 6.0f;
+
             fieldLabel("Title");
-            ImGui::SetNextItemWidth(formW);
+            ImGui::SetNextItemWidth(formW - micW - micGap);
             ImGui::InputText("##Title", uiState.edit.titleBuf, TITLE_BUF_SIZE);
+            ImGui::SameLine(0, micGap);
+            voiceMicButton("micTitle", uiState.edit.titleBuf, TITLE_BUF_SIZE);
 
             fieldLabel("Description");
-            ImGui::SetNextItemWidth(formW);
+            ImGui::SetNextItemWidth(formW - micW - micGap);
             ImGui::InputTextMultiline("##Desc", uiState.edit.descBuf, DESC_BUF_SIZE,
-                                      ImVec2(formW, 110.0f));
+                                      ImVec2(formW - micW - micGap, 110.0f));
+            ImGui::SameLine(0, micGap);
+            voiceMicButton("micDesc", uiState.edit.descBuf, DESC_BUF_SIZE, 110.0f);
 
             fieldLabel("Priority");
             ImGui::SetNextItemWidth(formW * 0.48f);

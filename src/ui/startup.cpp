@@ -9,6 +9,7 @@
 #include "ui/toast.h"
 #include "platform/window.h"
 #include "platform/renderer.h"
+#include "platform/voice.h"
 
 namespace {
 
@@ -141,6 +142,11 @@ namespace ui {
 
         tryAutoloadSample(store, uiState);
 
+        std::string voiceErr;
+        if (!platform::initVoice(voiceErr)) {
+            ui::pushToast(uiState, "Voice input disabled: " + voiceErr);
+        }
+
         bool quit = false;
         while (!quit) {
             if (!platform::pumpMessages(quit)) {
@@ -152,6 +158,8 @@ namespace ui {
             if (platform::consumePendingResize(rw, rh)) {
                 platform::handleResize(renderer, rw, rh);
             }
+
+            platform::pollVoiceEvents();
 
             handleFileFlags(store, uiState, window.hwnd);
             handleQuitRequest(store, uiState);
@@ -169,6 +177,7 @@ namespace ui {
             platform::presentFrame(renderer, true);
         }
 
+        platform::shutdownVoice();
         platform::shutdownImGui();
         platform::shutdownRenderer(renderer);
         platform::destroyMainWindow(window);

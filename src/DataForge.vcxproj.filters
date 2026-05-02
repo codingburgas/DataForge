@@ -46,6 +46,8 @@
     <ClCompile Include="ui\shortcuts.cpp">      <Filter>ui</Filter>      </ClCompile>
     <ClCompile Include="platform\window.cpp">   <Filter>platform</Filter> </ClCompile>
     <ClCompile Include="platform\renderer.cpp"> <Filter>platform</Filter> </ClCompile>
+    <ClCompile Include="platform\voice.cpp">    <Filter>platform</Filter> </ClCompile>
+    <ClCompile Include="ui\voice_input.cpp">    <Filter>ui</Filter>       </ClCompile>
     <ClCompile Include="vendor\imgui\imgui.cpp">         <Filter>vendor\imgui</Filter> </ClCompile>
     <ClCompile Include="vendor\imgui\imgui_draw.cpp">    <Filter>vendor\imgui</Filter> </ClCompile>
     <ClCompile Include="vendor\imgui\imgui_tables.cpp">  <Filter>vendor\imgui</Filter> </ClCompile>
@@ -81,6 +83,8 @@
     <ClInclude Include="headerStaticLibrary\include\ui\shortcuts.h">      <Filter>ui</Filter>   </ClInclude>
     <ClInclude Include="headerStaticLibrary\include\platform\window.h">   <Filter>platform</Filter> </ClInclude>
     <ClInclude Include="headerStaticLibrary\include\platform\renderer.h"> <Filter>platform</Filter> </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\platform\voice.h">    <Filter>platform</Filter> </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\ui\voice_input.h">    <Filter>ui</Filter>       </ClInclude>
     <ClInclude Include="headerStaticLibrary\include\ui\startup.h">           <Filter>ui</Filter>       </ClInclude>
   </ItemGroup>
 </Project>

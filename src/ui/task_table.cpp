@@ -1,5 +1,6 @@
 #include "ui/task_table.h"
 #include "ui/theme.h"
+#include "ui/voice_input.h"
 #include "logic/sort.h"
 #include "logic/search.h"
 #include "logic/tasks.h"
@@ -50,8 +51,12 @@ namespace ui {
             ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ColBgActive);
             ImGui::PushStyleColor(ImGuiCol_Border, ColBorder);
 
-            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+            const float micW = 48.0f;
+            const float micGap = 6.0f;
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - micW - micGap);
             ImGui::InputTextWithHint("##Search", "Search tasks by title...", uiState.searchBuffer, SEARCH_BUF_SIZE);
+            ImGui::SameLine(0, micGap);
+            voiceMicButton("micSearch", uiState.searchBuffer, SEARCH_BUF_SIZE);
 
             ImGui::Dummy(ImVec2(1.0f, 10.0f));
 
