@@ -1,5 +1,6 @@
 #include "ui/task_table.h"
 #include "ui/theme.h"
+#include "ui/i18n.h"
 #include "ui/voice_input.h"
 #include "logic/sort.h"
 #include "logic/search.h"
@@ -13,28 +14,28 @@ namespace ui {
 
     namespace {
 
-        static const char* PRIORITY_FILTER_ITEMS[] = {
-            "All priorities", "Low", "Medium", "High", "Critical"
-        };
-        static const char* STATUS_FILTER_ITEMS[] = {
-            "All statuses", "To Do", "In Progress", "Done", "Blocked"
-        };
-        static const char* SORT_KEY_ITEMS[]  = { "Priority", "Deadline" };
-        static const char* SORT_ALGO_ITEMS[] = { "Quick", "Bubble" };
-
         void renderToolbar(UiState& uiState, int count) {
+            const char* PRIORITY_FILTER_ITEMS[] = {
+                tr(K_TBL_ALL_PRIORITIES), tr(K_PRI_LOW), tr(K_PRI_MEDIUM), tr(K_PRI_HIGH), tr(K_PRI_CRITICAL)
+            };
+            const char* STATUS_FILTER_ITEMS[] = {
+                tr(K_TBL_ALL_STATUSES), tr(K_ST_TODO), tr(K_ST_IN_PROGRESS), tr(K_ST_DONE), tr(K_ST_BLOCKED)
+            };
+            const char* SORT_KEY_ITEMS[]  = { tr(K_SORT_PRIORITY), tr(K_SORT_DEADLINE) };
+            const char* SORT_ALGO_ITEMS[] = { tr(K_ALGO_QUICK), tr(K_ALGO_BUBBLE) };
+
             ImGui::PushFont(fontHeading());
-            ImGui::TextColored(ColTextPrimary, "Task Queue");
+            ImGui::TextColored(ColTextPrimary, "%s", tr(K_TBL_QUEUE));
             ImGui::PopFont();
 
             ImGui::SameLine();
             ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 124.0f);
             ImGui::PushFont(fontUiSemibold());
-            ImGui::TextColored(ColTextFaint, "%d results", count);
+            ImGui::TextColored(ColTextFaint, tr(K_TBL_RESULTS_FMT), count);
             ImGui::PopFont();
 
             ImGui::Dummy(ImVec2(1.0f, 10.0f));
-            ImGui::TextColored(ColTextMuted, "Search, filter, and rank work without leaving the main view.");
+            ImGui::TextColored(ColTextMuted, "%s", tr(K_TBL_DESCRIPTION_HINT));
             ImGui::Dummy(ImVec2(1.0f, 10.0f));
 
             ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 14.0f);
@@ -46,7 +47,7 @@ namespace ui {
             const float micW = 48.0f;
             const float micGap = 6.0f;
             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - micW - micGap);
-            ImGui::InputTextWithHint("##Search", "Search tasks by title...", uiState.searchBuffer, SEARCH_BUF_SIZE);
+            ImGui::InputTextWithHint("##Search", tr(K_TBL_SEARCH_HINT), uiState.searchBuffer, SEARCH_BUF_SIZE);
             ImGui::SameLine(0, micGap);
             voiceMicButton("micSearch", uiState.searchBuffer, SEARCH_BUF_SIZE);
 
@@ -128,7 +129,7 @@ namespace ui {
             }
             ImGui::PopFont();
 
-            std::string note = task.description.empty() ? "No description provided." : task.description;
+            std::string note = task.description.empty() ? std::string(tr(K_TBL_NO_DESCRIPTION)) : task.description;
             if (note.size() > 92) {
                 note = note.substr(0, 92) + "...";
             }
@@ -144,9 +145,9 @@ namespace ui {
 
             int descendants = logic::countDescendants(store, task.id);
             char effort[32];
-            std::snprintf(effort, sizeof(effort), "%d min", task.estimatedMinutes);
+            std::snprintf(effort, sizeof(effort), tr(K_TBL_MIN_FMT), task.estimatedMinutes);
             ImGui::SetCursorScreenPos(ImVec2(min.x + 36.0f, max.y - 22.0f));
-            ImGui::TextColored(ColTextMuted, "%s  |  %d subtasks", effort, descendants);
+            ImGui::TextColored(ColTextMuted, tr(K_TBL_EFFORT_SUBTASKS_FMT), effort, descendants);
 
             std::string due = logic::formatDate(task.deadline);
             UrgencyColor dueCol = urgencyForDeadline(task.deadline, today, task.status);
@@ -154,11 +155,11 @@ namespace ui {
             ImGui::SetCursorScreenPos(ImVec2(max.x - 102.0f, min.y + 22.0f));
             ImGui::PushFont(fontUiSemibold());
             ImGui::TextColored(due.empty() ? ColTextFaint : dueFloat,
-                               "%s", due.empty() ? "No due date" : due.c_str());
+                               "%s", due.empty() ? tr(K_TBL_NO_DUE) : due.c_str());
             ImGui::PopFont();
 
             char actual[32];
-            std::snprintf(actual, sizeof(actual), "Actual %d min", task.actualMinutes);
+            std::snprintf(actual, sizeof(actual), tr(K_TBL_ACTUAL_MIN_FMT), task.actualMinutes);
             ImGui::SetCursorScreenPos(ImVec2(max.x - 104.0f, min.y + 82.0f));
             ImGui::TextColored(ColTextFaint, "%s", actual);
 
@@ -197,9 +198,9 @@ namespace ui {
         if (rows.empty()) {
             ImGui::Dummy(ImVec2(1.0f, 24.0f));
             ImGui::PushFont(fontHeading());
-            ImGui::TextColored(ColTextPrimary, "Nothing matches the current view");
+            ImGui::TextColored(ColTextPrimary, "%s", tr(K_TBL_NOTHING_MATCHES));
             ImGui::PopFont();
-            ImGui::TextColored(ColTextFaint, "Try clearing filters or add a new task from the top bar.");
+            ImGui::TextColored(ColTextFaint, "%s", tr(K_TBL_TRY_CLEARING));
         } else {
             for (const data::Task& row : rows) {
                 renderTaskCard(store, row, uiState.selectedTaskId == row.id, today, uiState);

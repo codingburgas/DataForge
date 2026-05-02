@@ -1,4 +1,5 @@
 #include "ui/theme.h"
+#include "ui/i18n.h"
 #include "logic/dates.h"
 #include "imgui.h"
 #include "imgui_internal.h"
@@ -298,20 +299,20 @@ namespace ui {
 
     const char* priorityLabel(data::Priority p) {
         switch (p) {
-            case data::PRIORITY_LOW:      return "Low";
-            case data::PRIORITY_MEDIUM:   return "Medium";
-            case data::PRIORITY_HIGH:     return "High";
-            case data::PRIORITY_CRITICAL: return "Critical";
+            case data::PRIORITY_LOW:      return tr(K_PRI_LOW);
+            case data::PRIORITY_MEDIUM:   return tr(K_PRI_MEDIUM);
+            case data::PRIORITY_HIGH:     return tr(K_PRI_HIGH);
+            case data::PRIORITY_CRITICAL: return tr(K_PRI_CRITICAL);
         }
         return "?";
     }
 
     const char* statusLabel(data::Status s) {
         switch (s) {
-            case data::STATUS_TODO:        return "To Do";
-            case data::STATUS_IN_PROGRESS: return "In Progress";
-            case data::STATUS_DONE:        return "Done";
-            case data::STATUS_BLOCKED:     return "Blocked";
+            case data::STATUS_TODO:        return tr(K_ST_TODO);
+            case data::STATUS_IN_PROGRESS: return tr(K_ST_IN_PROGRESS);
+            case data::STATUS_DONE:        return tr(K_ST_DONE);
+            case data::STATUS_BLOCKED:     return tr(K_ST_BLOCKED);
         }
         return "?";
     }
@@ -319,13 +320,13 @@ namespace ui {
     BadgeStyle statusBadgeStyle(data::Status s) {
         switch (s) {
             case data::STATUS_TODO:
-                return { "To Do",       HEX(0xF1F5F9), HEX(0x64748B), HEX(0x94A3B8) };
+                return { tr(K_ST_TODO),        HEX(0xF1F5F9), HEX(0x64748B), HEX(0x94A3B8) };
             case data::STATUS_IN_PROGRESS:
-                return { "In Progress", HEX(0xFFFBEB), HEX(0xB45309), HEX(0xD97706) };
+                return { tr(K_ST_IN_PROGRESS), HEX(0xFFFBEB), HEX(0xB45309), HEX(0xD97706) };
             case data::STATUS_DONE:
-                return { "Done",        HEX(0xECFDF5), HEX(0x065F46), HEX(0x059669) };
+                return { tr(K_ST_DONE),        HEX(0xECFDF5), HEX(0x065F46), HEX(0x059669) };
             case data::STATUS_BLOCKED:
-                return { "Blocked",     HEX(0xFEF2F2), HEX(0x991B1B), HEX(0xDC2626) };
+                return { tr(K_ST_BLOCKED),     HEX(0xFEF2F2), HEX(0x991B1B), HEX(0xDC2626) };
         }
         return { "?", HEX(0xF1F5F9), HEX(0x64748B), HEX(0x94A3B8) };
     }
@@ -333,13 +334,13 @@ namespace ui {
     BadgeStyle priorityBadgeStyle(data::Priority p) {
         switch (p) {
             case data::PRIORITY_LOW:
-                return { "Low",      HEX(0xECFDF5), HEX(0x059669), HEX(0x059669) };
+                return { tr(K_PRI_LOW),      HEX(0xECFDF5), HEX(0x059669), HEX(0x059669) };
             case data::PRIORITY_MEDIUM:
-                return { "Medium",   HEX(0xEFF6FF), HEX(0x2563EB), HEX(0x2563EB) };
+                return { tr(K_PRI_MEDIUM),   HEX(0xEFF6FF), HEX(0x2563EB), HEX(0x2563EB) };
             case data::PRIORITY_HIGH:
-                return { "High",     HEX(0xFFF7ED), HEX(0xEA580C), HEX(0xEA580C) };
+                return { tr(K_PRI_HIGH),     HEX(0xFFF7ED), HEX(0xEA580C), HEX(0xEA580C) };
             case data::PRIORITY_CRITICAL:
-                return { "Critical", HEX(0xFEF2F2), HEX(0xDC2626), HEX(0xDC2626) };
+                return { tr(K_PRI_CRITICAL), HEX(0xFEF2F2), HEX(0xDC2626), HEX(0xDC2626) };
         }
         return { "?", HEX(0xF1F5F9), HEX(0x64748B), HEX(0x94A3B8) };
     }

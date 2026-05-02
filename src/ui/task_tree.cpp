@@ -1,5 +1,6 @@
 #include "ui/task_tree.h"
 #include "ui/theme.h"
+#include "ui/i18n.h"
 #include "logic/tasks.h"
 #include "logic/recursion.h"
 #include "data/store.h"
@@ -14,7 +15,7 @@ namespace ui {
                             int taskId,
                             int depth) {
             if (depth > logic::MAX_TREE_DEPTH) {
-                ImGui::TextColored(ColTextFaint, "(depth cap)");
+                ImGui::TextColored(ColTextFaint, "%s", tr(K_TREE_DEPTH_CAP));
                 return;
             }
 
@@ -80,19 +81,19 @@ namespace ui {
         std::vector<int> roots = logic::rootTaskIds(store);
 
         ImGui::PushFont(fontHeading());
-        ImGui::TextColored(ColTextPrimary, "Project Tree");
+        ImGui::TextColored(ColTextPrimary, "%s", tr(K_TREE_PROJECT_TREE));
         ImGui::PopFont();
-        ImGui::TextColored(ColTextMuted, "%d root items", static_cast<int>(roots.size()));
+        ImGui::TextColored(ColTextMuted, tr(K_TREE_ROOT_ITEMS_FMT), static_cast<int>(roots.size()));
         ImGui::Dummy(ImVec2(1.0f, 10.0f));
         ImGui::Separator();
         ImGui::Dummy(ImVec2(1.0f, 8.0f));
 
         if (store.tasks.empty()) {
-            ImGui::TextColored(ColTextFaint, "No tasks yet.");
+            ImGui::TextColored(ColTextFaint, "%s", tr(K_TREE_NO_TASKS));
             return;
         }
         if (roots.empty()) {
-            ImGui::TextColored(ColTextFaint, "No root tasks.");
+            ImGui::TextColored(ColTextFaint, "%s", tr(K_TREE_NO_ROOT_TASKS));
             return;
         }
 
@@ -109,7 +110,7 @@ namespace ui {
                 ImGui::TextColored(ColTextPrimary, "#%d %s", selected->id, selected->title.c_str());
                 ImGui::PopFont();
                 ImGui::SetCursorScreenPos(ImVec2(min.x + 16.0f, min.y + 36.0f));
-                ImGui::TextColored(ColTextFaint, "%d descendants  |  depth %d",
+                ImGui::TextColored(ColTextFaint, tr(K_TREE_DESC_DEPTH_FMT),
                                    logic::countDescendants(store, selected->id),
                                    logic::maxSubtreeDepth(store, selected->id));
                 ImGui::Dummy(ImVec2(1.0f, 74.0f));

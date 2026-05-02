@@ -1,5 +1,6 @@
 #include "ui/dialogs.h"
 #include "ui/theme.h"
+#include "ui/i18n.h"
 #include "ui/toast.h"
 #include "ui/voice_input.h"
 #include "logic/tasks.h"
@@ -12,8 +13,6 @@ namespace ui {
 
     namespace {
 
-        static const char* PRIORITY_ITEMS[] = { "Low", "Medium", "High", "Critical" };
-        static const char* STATUS_ITEMS[]   = { "To Do", "In Progress", "Done", "Blocked" };
 
         static const char* POPUP_ADD_EDIT    = "Task";
         static const char* POPUP_CONFIRM_DEL = "Confirm Delete";
@@ -38,9 +37,9 @@ namespace ui {
                 candidates.push_back(id);
             }
 
-            std::string preview = "(root)";
+            std::string preview = tr(K_DLG_PARENT_ROOT);
             if (uiState.edit.parentId != -1) {
-                preview = "(invalid)";
+                preview = tr(K_DLG_PARENT_INVALID);
                 if (const data::Task* p =
                         data::findTaskInStoreConst(store, uiState.edit.parentId)) {
                     preview = "#" + std::to_string(p->id) + " " + p->title;
@@ -49,7 +48,7 @@ namespace ui {
 
             if (ImGui::BeginCombo("##Parent", preview.c_str())) {
                 for (int cid : candidates) {
-                    std::string label = "(root)";
+                    std::string label = tr(K_DLG_PARENT_ROOT);
                     if (cid != -1) {
                         if (const data::Task* t =
                                 data::findTaskInStoreConst(store, cid)) {
@@ -78,46 +77,49 @@ namespace ui {
             const float micW = 48.0f;
             const float micGap = 6.0f;
 
-            fieldLabel("Title");
+            const char* PRIORITY_ITEMS[] = { tr(K_PRI_LOW), tr(K_PRI_MEDIUM), tr(K_PRI_HIGH), tr(K_PRI_CRITICAL) };
+            const char* STATUS_ITEMS[]   = { tr(K_ST_TODO), tr(K_ST_IN_PROGRESS), tr(K_ST_DONE), tr(K_ST_BLOCKED) };
+
+            fieldLabel(tr(K_DLG_TITLE_LBL));
             ImGui::SetNextItemWidth(formW - micW - micGap);
             ImGui::InputText("##Title", uiState.edit.titleBuf, TITLE_BUF_SIZE);
             ImGui::SameLine(0, micGap);
             voiceMicButton("micTitle", uiState.edit.titleBuf, TITLE_BUF_SIZE);
 
-            fieldLabel("Description");
+            fieldLabel(tr(K_DLG_DESC_LBL));
             ImGui::SetNextItemWidth(formW - micW - micGap);
             ImGui::InputTextMultiline("##Desc", uiState.edit.descBuf, DESC_BUF_SIZE,
                                       ImVec2(formW - micW - micGap, 110.0f));
             ImGui::SameLine(0, micGap);
             voiceMicButton("micDesc", uiState.edit.descBuf, DESC_BUF_SIZE, 110.0f);
 
-            fieldLabel("Priority");
+            fieldLabel(tr(K_DLG_PRIORITY_LBL));
             ImGui::SetNextItemWidth(formW * 0.48f);
             ImGui::Combo("##Priority", &uiState.edit.priority,
                          PRIORITY_ITEMS, IM_ARRAYSIZE(PRIORITY_ITEMS));
             ImGui::SameLine(0, 12.0f);
-            fieldLabel("Status");
+            fieldLabel(tr(K_DLG_STATUS_LBL));
             ImGui::SetCursorPosX(ImGui::GetCursorPosX());
             ImGui::SetNextItemWidth(formW * 0.48f);
             ImGui::Combo("##Status", &uiState.edit.status,
                          STATUS_ITEMS, IM_ARRAYSIZE(STATUS_ITEMS));
 
-            fieldLabel("Deadline (YYYY-MM-DD)");
+            fieldLabel(tr(K_DLG_DEADLINE_LBL));
             ImGui::SetNextItemWidth(formW);
             ImGui::InputText("##Deadline", uiState.edit.deadlineBuf, DATE_BUF_SIZE);
 
-            fieldLabel("Estimated minutes");
+            fieldLabel(tr(K_DLG_EST_MINS_LBL));
             ImGui::SetNextItemWidth(formW * 0.48f);
             ImGui::InputText("##EstMins", uiState.edit.estimateBuf, NUMERIC_BUF_SIZE,
                              ImGuiInputTextFlags_CharsDecimal);
             ImGui::SameLine(0, 12.0f);
-            fieldLabel("Actual minutes");
+            fieldLabel(tr(K_DLG_ACT_MINS_LBL));
             ImGui::SetCursorPosX(ImGui::GetCursorPosX());
             ImGui::SetNextItemWidth(formW * 0.48f);
             ImGui::InputText("##ActMins", uiState.edit.actualBuf, NUMERIC_BUF_SIZE,
                              ImGuiInputTextFlags_CharsDecimal);
 
-            fieldLabel("Parent task");
+            fieldLabel(tr(K_DLG_PARENT_LBL));
             ImGui::SetNextItemWidth(formW);
             renderParentPicker(store, uiState);
 
@@ -186,10 +188,10 @@ namespace ui {
         ImGui::SetCursorPosX(24.0f);
         ImGui::PushFont(fontHeading());
         ImGui::TextColored(ColTextPrimary,
-                           "%s", uiState.editingTaskId > 0 ? "Edit Task" : "Create Task");
+                           "%s", uiState.editingTaskId > 0 ? tr(K_DLG_EDIT_TASK_HEADING) : tr(K_DLG_CREATE_TASK_HEADING));
         ImGui::PopFont();
         ImGui::SetCursorPosX(24.0f);
-        ImGui::TextColored(ColTextFaint, "Capture the work clearly so the queue stays readable.");
+        ImGui::TextColored(ColTextFaint, "%s", tr(K_DLG_CAPTURE_HINT));
         ImGui::Dummy(ImVec2(1.0f, 14.0f));
         ImGui::Separator();
         ImGui::Dummy(ImVec2(1.0f, 10.0f));
@@ -216,7 +218,7 @@ namespace ui {
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ColBgHover);
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ColBgActive);
         ImGui::PushStyleColor(ImGuiCol_Text, ColTextSecondary);
-        if (ImGui::Button("Cancel", ImVec2(100.0f, 38.0f))) {
+        if (ImGui::Button(tr(K_DLG_CANCEL), ImVec2(100.0f, 38.0f))) {
             uiState.lastValidationOk = true;
             uiState.lastValidationMessage.clear();
             ImGui::CloseCurrentPopup();
@@ -225,7 +227,7 @@ namespace ui {
 
         ImGui::SameLine(0, 10.0f);
         if (gradientButton("##saveTaskModal",
-                           uiState.editingTaskId > 0 ? "Save Changes" : "Create Task",
+                           uiState.editingTaskId > 0 ? tr(K_DLG_SAVE_CHANGES) : tr(K_DLG_CREATE_TASK_BTN),
                            ImVec2(116.0f, 38.0f), 14.0f)) {
             data::Task task{};
             if (uiState.editingTaskId > 0) {
@@ -244,7 +246,7 @@ namespace ui {
             if (uiState.editingTaskId > 0) {
                 task.id = uiState.editingTaskId;
                 if (logic::editTask(store, task, vr)) {
-                    pushToast(uiState, "Task updated.");
+                    pushToast(uiState, tr(K_TOAST_TASK_UPDATED));
                     uiState.lastValidationOk = true;
                     uiState.lastValidationMessage.clear();
                     ImGui::CloseCurrentPopup();
@@ -256,7 +258,7 @@ namespace ui {
                 int newId = logic::createTask(store, task, vr);
                 if (newId > 0) {
                     uiState.selectedTaskId = newId;
-                    pushToast(uiState, "Task created.");
+                    pushToast(uiState, tr(K_TOAST_TASK_CREATED));
                     uiState.lastValidationOk = true;
                     uiState.lastValidationMessage.clear();
                     ImGui::CloseCurrentPopup();
@@ -291,17 +293,17 @@ namespace ui {
         ImGui::Dummy(ImVec2(1.0f, 18.0f));
         ImGui::SetCursorPosX(24.0f);
         ImGui::PushFont(fontHeading());
-        ImGui::TextColored(ColTextPrimary, "Delete task");
+        ImGui::TextColored(ColTextPrimary, "%s", tr(K_DEL_HEADING));
         ImGui::PopFont();
         ImGui::SetCursorPosX(24.0f);
-        ImGui::TextColored(ColTextFaint, "This action removes the selected task and all of its descendants.");
+        ImGui::TextColored(ColTextFaint, "%s", tr(K_DEL_BODY));
         ImGui::Dummy(ImVec2(1.0f, 14.0f));
         ImGui::Separator();
         ImGui::Dummy(ImVec2(1.0f, 14.0f));
 
         if (task == nullptr) {
             ImGui::SetCursorPosX(24.0f);
-            ImGui::TextColored(ColTextFaint, "Task no longer exists.");
+            ImGui::TextColored(ColTextFaint, "%s", tr(K_DEL_TASK_GONE));
             uiState.pendingDeleteId = -1;
         } else {
             ImGui::SetCursorPosX(24.0f);
@@ -312,8 +314,8 @@ namespace ui {
             int descendants = logic::countDescendants(store, id);
             ImGui::TextColored(descendants > 0 ? HEX(0xDC2626) : ColTextFaint,
                                descendants > 0
-                                   ? "Also deletes %d subtasks."
-                                   : "No subtasks will be affected.",
+                                   ? tr(K_DEL_ALSO_FMT)
+                                   : tr(K_DEL_NONE_AFFECTED),
                                descendants);
         }
 
@@ -323,7 +325,7 @@ namespace ui {
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ColBgHover);
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ColBgActive);
         ImGui::PushStyleColor(ImGuiCol_Text, ColTextSecondary);
-        if (ImGui::Button("Cancel", ImVec2(100.0f, 38.0f))) {
+        if (ImGui::Button(tr(K_DEL_CANCEL), ImVec2(100.0f, 38.0f))) {
             uiState.pendingDeleteId = -1;
             ImGui::CloseCurrentPopup();
         }
@@ -334,12 +336,15 @@ namespace ui {
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, HEX(0xFEE2E2));
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, HEX(0xFECACA));
         ImGui::PushStyleColor(ImGuiCol_Text, HEX(0xB91C1C));
-        if (ImGui::Button("Delete", ImVec2(100.0f, 38.0f)) && task != nullptr) {
+        if (ImGui::Button(tr(K_DEL_DELETE), ImVec2(100.0f, 38.0f)) && task != nullptr) {
             logic::takeSnapshot(store, uiState.undoSnapshot);
             uiState.hasUndoSnapshot = true;
             int removed = logic::deleteTaskCascade(store, id);
-            std::string msg = "Deleted " + std::to_string(removed) + (removed == 1 ? " task." : " tasks.");
-            pushToast(uiState, msg);
+            char buf[96];
+            std::snprintf(buf, sizeof(buf),
+                removed == 1 ? tr(K_TOAST_DELETED_ONE_FMT) : tr(K_TOAST_DELETED_MANY_FMT),
+                removed);
+            pushToast(uiState, std::string(buf));
             if (uiState.selectedTaskId == id) {
                 uiState.selectedTaskId = -1;
             }
@@ -369,16 +374,16 @@ namespace ui {
         ImGui::Dummy(ImVec2(1.0f, 18.0f));
         ImGui::SetCursorPosX(24.0f);
         ImGui::PushFont(fontHeading());
-        ImGui::TextColored(ColTextPrimary, "Unsaved changes");
+        ImGui::TextColored(ColTextPrimary, "%s", tr(K_QUIT_HEADING));
         ImGui::PopFont();
         ImGui::SetCursorPosX(24.0f);
-        ImGui::TextColored(ColTextFaint, "Save the current store before closing the application?");
+        ImGui::TextColored(ColTextFaint, "%s", tr(K_QUIT_BODY));
         ImGui::Dummy(ImVec2(1.0f, 16.0f));
         ImGui::Separator();
         ImGui::Dummy(ImVec2(1.0f, 16.0f));
 
         ImGui::SetCursorPosX(24.0f);
-        if (gradientButton("##saveQuit", "Save and quit", ImVec2(128.0f, 38.0f), 14.0f)) {
+        if (gradientButton("##saveQuit", tr(K_QUIT_SAVE_AND_QUIT), ImVec2(128.0f, 38.0f), 14.0f)) {
             uiState.triggeredSave = true;
             uiState.requestedQuit = true;
             ImGui::CloseCurrentPopup();
@@ -388,7 +393,7 @@ namespace ui {
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, HEX(0xFEE2E2));
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, HEX(0xFECACA));
         ImGui::PushStyleColor(ImGuiCol_Text, HEX(0xB91C1C));
-        if (ImGui::Button("Quit without saving", ImVec2(156.0f, 38.0f))) {
+        if (ImGui::Button(tr(K_QUIT_WITHOUT_SAVING), ImVec2(156.0f, 38.0f))) {
             store.dirty = false;
             uiState.requestedQuit = true;
             ImGui::CloseCurrentPopup();
@@ -399,7 +404,7 @@ namespace ui {
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ColBgHover);
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ColBgActive);
         ImGui::PushStyleColor(ImGuiCol_Text, ColTextSecondary);
-        if (ImGui::Button("Cancel", ImVec2(88.0f, 38.0f))) {
+        if (ImGui::Button(tr(K_QUIT_CANCEL), ImVec2(88.0f, 38.0f))) {
             uiState.requestedQuit = false;
             ImGui::CloseCurrentPopup();
         }
@@ -433,24 +438,24 @@ namespace ui {
         ImGui::TextColored(ColTextPrimary, "DataForge");
         ImGui::PopFont();
         ImGui::SetCursorPosX(24.0f);
-        ImGui::TextColored(ColTextFaint, "Hierarchical task manager built with Dear ImGui, Win32, and DirectX 11.");
+        ImGui::TextColored(ColTextFaint, "%s", tr(K_ABOUT_BODY));
         ImGui::Dummy(ImVec2(1.0f, 14.0f));
         ImGui::Separator();
         ImGui::Dummy(ImVec2(1.0f, 14.0f));
 
         ImGui::SetCursorPosX(24.0f);
-        ImGui::TextColored(ColTextMuted, "Key traits");
+        ImGui::TextColored(ColTextMuted, "%s", tr(K_ABOUT_KEY_TRAITS_LBL));
         ImGui::SetCursorPosX(24.0f);
         ImGui::PushFont(fontUiSemibold());
-        ImGui::TextColored(ColTextPrimary, "Task trees, analytics, algorithm benchmarking, and keyboard-first editing.");
+        ImGui::TextColored(ColTextPrimary, "%s", tr(K_ABOUT_KEY_TRAITS));
         ImGui::PopFont();
         ImGui::Dummy(ImVec2(1.0f, 10.0f));
         ImGui::SetCursorPosX(24.0f);
-        ImGui::TextColored(ColTextFaint, "This redesign consolidates the workspace into real pages instead of modal-heavy navigation.");
+        ImGui::TextColored(ColTextFaint, "%s", tr(K_ABOUT_REDESIGN));
         ImGui::Dummy(ImVec2(1.0f, 16.0f));
 
         ImGui::SetCursorPosX(24.0f);
-        if (gradientButton("##closeAbout", "Close", ImVec2(120.0f, 38.0f), 14.0f)) {
+        if (gradientButton("##closeAbout", tr(K_ABOUT_CLOSE), ImVec2(120.0f, 38.0f), 14.0f)) {
             ImGui::CloseCurrentPopup();
         }
 

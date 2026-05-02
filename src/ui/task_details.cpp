@@ -1,5 +1,6 @@
 #include "ui/task_details.h"
 #include "ui/theme.h"
+#include "ui/i18n.h"
 #include "ui/dialogs.h"
 #include "logic/recursion.h"
 #include "logic/tasks.h"
@@ -31,22 +32,22 @@ namespace ui {
 
     void renderTaskDetailsPanel(data::TaskStore& store, UiState& uiState) {
         ImGui::PushFont(fontHeading());
-        ImGui::TextColored(ColTextPrimary, "Task Details");
+        ImGui::TextColored(ColTextPrimary, "%s", tr(K_DT_TITLE));
         ImGui::PopFont();
-        ImGui::TextColored(ColTextMuted, "Selection summary, subtree metrics, and task actions.");
+        ImGui::TextColored(ColTextMuted, "%s", tr(K_DT_SUBTITLE));
         ImGui::Dummy(ImVec2(1.0f, 10.0f));
         ImGui::Separator();
         ImGui::Dummy(ImVec2(1.0f, 12.0f));
 
         if (uiState.selectedTaskId <= 0) {
-            ImGui::TextColored(ColTextFaint, "Select a task to inspect it.");
+            ImGui::TextColored(ColTextFaint, "%s", tr(K_DT_SELECT_TO_INSPECT));
             return;
         }
 
         const data::Task* task = data::findTaskInStoreConst(store, uiState.selectedTaskId);
         if (task == nullptr) {
             uiState.selectedTaskId = -1;
-            ImGui::TextColored(ColTextFaint, "Task no longer exists.");
+            ImGui::TextColored(ColTextFaint, "%s", tr(K_DT_TASK_GONE));
             return;
         }
 
@@ -83,7 +84,7 @@ namespace ui {
         ImGui::SameLine(0, 8.0f);
         renderBadge(pb.label, pb.bg, pb.text, false, {});
 
-        std::string note = task->description.empty() ? "No description yet." : task->description;
+        std::string note = task->description.empty() ? std::string(tr(K_DT_NO_DESCRIPTION)) : task->description;
         ImGui::SetCursorScreenPos(ImVec2(heroMin.x + 90.0f, heroMin.y + 108.0f));
         ImGui::PushTextWrapPos(heroMax.x - 18.0f);
         ImGui::TextColored(ColTextMuted, "%s", note.c_str());
@@ -93,11 +94,11 @@ namespace ui {
 
         char deadline[32];
         std::string due = logic::formatDate(task->deadline);
-        std::snprintf(deadline, sizeof(deadline), "%s", due.empty() ? "No due date" : due.c_str());
+        std::snprintf(deadline, sizeof(deadline), "%s", due.empty() ? tr(K_DT_NO_DUE) : due.c_str());
         char est[32];
-        std::snprintf(est, sizeof(est), "%d min", task->estimatedMinutes);
+        std::snprintf(est, sizeof(est), tr(K_TBL_MIN_FMT), task->estimatedMinutes);
         char actual[32];
-        std::snprintf(actual, sizeof(actual), "%d min", task->actualMinutes);
+        std::snprintf(actual, sizeof(actual), tr(K_TBL_MIN_FMT), task->actualMinutes);
         char depth[32];
         std::snprintf(depth, sizeof(depth), "%d", logic::maxSubtreeDepth(store, task->id));
         char desc[32];
@@ -108,30 +109,30 @@ namespace ui {
 
         float tileGap = 10.0f;
         float tileW = (ImGui::GetContentRegionAvail().x - tileGap) * 0.5f;
-        renderMetricTile("Deadline", deadline, tileW);
+        renderMetricTile(tr(K_DT_DEADLINE), deadline, tileW);
         ImGui::SameLine(0, tileGap);
-        renderMetricTile("Estimated", est, tileW);
-        renderMetricTile("Actual", actual, tileW);
+        renderMetricTile(tr(K_DT_ESTIMATED), est, tileW);
+        renderMetricTile(tr(K_DT_ACTUAL), actual, tileW);
         ImGui::SameLine(0, tileGap);
-        renderMetricTile("Subtasks", desc, tileW);
-        renderMetricTile("Depth", depth, tileW);
+        renderMetricTile(tr(K_DT_SUBTASKS), desc, tileW);
+        renderMetricTile(tr(K_DT_DEPTH), depth, tileW);
         ImGui::SameLine(0, tileGap);
-        renderMetricTile("Subtree effort", totalEst, tileW);
+        renderMetricTile(tr(K_DT_SUBTREE_EFFORT), totalEst, tileW);
 
         ImGui::Dummy(ImVec2(1.0f, 14.0f));
 
         std::string created = logic::formatDate(task->createdAt);
         std::string updated = logic::formatDate(task->updatedAt);
-        ImGui::TextColored(ColTextFaint, "Created %s", created.empty() ? "-" : created.c_str());
+        ImGui::TextColored(ColTextFaint, tr(K_DT_CREATED_FMT), created.empty() ? "-" : created.c_str());
         ImGui::SameLine(0, 18.0f);
-        ImGui::TextColored(ColTextFaint, "Updated %s", updated.empty() ? "-" : updated.c_str());
+        ImGui::TextColored(ColTextFaint, tr(K_DT_UPDATED_FMT), updated.empty() ? "-" : updated.c_str());
 
         ImGui::Dummy(ImVec2(1.0f, 16.0f));
         ImGui::Separator();
         ImGui::Dummy(ImVec2(1.0f, 12.0f));
 
         float btnW = (ImGui::GetContentRegionAvail().x - 16.0f) / 3.0f;
-        if (gradientButton("##editTask", "Edit", ImVec2(btnW, 36.0f), 14.0f)) {
+        if (gradientButton("##editTask", tr(K_DT_EDIT), ImVec2(btnW, 36.0f), 14.0f)) {
             openEditDialog(uiState, *task);
         }
         ImGui::SameLine(0, 8.0f);
@@ -140,7 +141,7 @@ namespace ui {
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ColBgHover);
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, ColBgActive);
         ImGui::PushStyleColor(ImGuiCol_Text, ColTextSecondary);
-        if (ImGui::Button("Add Subtask", ImVec2(btnW, 36.0f))) {
+        if (ImGui::Button(tr(K_DT_ADD_SUBTASK), ImVec2(btnW, 36.0f))) {
             openCreateDialog(uiState, task->id);
         }
         ImGui::SameLine(0, 8.0f);
@@ -148,7 +149,7 @@ namespace ui {
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered, HEX(0xFEE2E2));
         ImGui::PushStyleColor(ImGuiCol_ButtonActive, HEX(0xFECACA));
         ImGui::PushStyleColor(ImGuiCol_Text, HEX(0xB91C1C));
-        if (ImGui::Button("Delete", ImVec2(btnW, 36.0f))) {
+        if (ImGui::Button(tr(K_DT_DELETE), ImVec2(btnW, 36.0f))) {
             openConfirmDelete(uiState, task->id);
         }
         ImGui::PopStyleColor(8);

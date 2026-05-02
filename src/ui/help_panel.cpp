@@ -1,5 +1,6 @@
 #include "ui/help_panel.h"
 #include "ui/theme.h"
+#include "ui/i18n.h"
 #include "ui/toast.h"
 #include "imgui.h"
 
@@ -104,9 +105,9 @@ namespace ui {
         }
 
         std::string formatMtime(std::time_t t) {
-            if (t == 0) return "unknown";
+            if (t == 0) return tr(K_HP_UNKNOWN);
             std::tm local{};
-            if (localtime_s(&local, &t) != 0) return "unknown";
+            if (localtime_s(&local, &t) != 0) return tr(K_HP_UNKNOWN);
             char buf[32];
             std::snprintf(buf, sizeof(buf), "%04d-%02d-%02d %02d:%02d",
                 local.tm_year + 1900, local.tm_mon + 1, local.tm_mday,
@@ -161,99 +162,48 @@ namespace ui {
 
         void renderGuides() {
             cardBegin("##HelpGuides", 0.0f);
-            sectionHeading("UI Guide",
-                "Walkthrough of every part of the workspace.");
+            sectionHeading(tr(K_HP_GUIDE_HEADING), tr(K_HP_GUIDE_SUB));
 
-            guideEntry("Sidebar",
-                "Switch between Overview, My Tasks, Analytics, Benchmark, and Help. "
-                "Click 'Collapse' at the bottom to shrink the sidebar to icon-only.");
-
-            guideEntry("Topbar",
-                "Shows the current page title, today's date, and an unsaved/ready "
-                "indicator. The '+ New Task' button opens the create dialog.");
-
-            guideEntry("Overview page",
-                "Greeting, four metric cards (total, completed, projects, blocked), "
-                "the Today's Focus list of unfinished priority tasks, and side cards "
-                "for active root projects and recent activity. Click any card to jump "
-                "to My Tasks with that task selected.");
-
-            guideEntry("My Tasks page",
-                "Three panes: tree on the left for hierarchy navigation, table in the "
-                "middle for filtering and sorting, details on the right for editing "
-                "the selected task. Use the search box and priority/status filters "
-                "above the table to narrow the list.");
-
-            guideEntry("Task tree",
-                "Expand/collapse parent tasks. Selecting a node updates the table "
-                "and details panes. Right-click a node for create/delete actions.");
-
-            guideEntry("Task table",
-                "Click a row to select. Header sort matches the Algorithms menu. "
-                "Search box matches title and description.");
-
-            guideEntry("Task details",
-                "Read-only view with progress, deadline urgency, descendants count, "
-                "and shortcuts to edit or delete. Edit opens the same dialog as 'New "
-                "Task'.");
-
-            guideEntry("Analytics page",
-                "Charts and counts for status mix, priority mix, and completion "
-                "trends across the current store.");
-
-            guideEntry("Benchmark page",
-                "Generates a synthetic task list of the chosen size and times "
-                "Quick sort vs Bubble sort on it. Use to compare algorithm "
-                "behavior on the same data.");
-
-            guideEntry("Status bar",
-                "Bottom strip with file path, dirty indicator, and last toast "
-                "message.");
-
-            guideEntry("Menu bar",
-                "File: New / Open / Save / Save As / Exit. Edit: New Task, edit/"
-                "delete selected, Undo. View: switch page or theme. Algorithms: "
-                "sort key and algorithm. Help: this page and About.");
-
-            guideEntry("Voice input",
-                "The mic icon next to Title and Description fields records speech "
-                "and inserts the transcript. Requires Windows speech to be "
-                "available; failures show as a toast on launch.");
-
-            guideEntry("Keyboard shortcuts",
-                "Ctrl+N new file, Ctrl+O open, Ctrl+S save, Ctrl+Shift+S save as, "
-                "Ctrl+Enter new task, Del delete selected, Ctrl+Z undo last "
-                "destructive action.");
+            guideEntry(tr(K_HP_T_SIDEBAR),    tr(K_HP_B_SIDEBAR));
+            guideEntry(tr(K_HP_T_TOPBAR),     tr(K_HP_B_TOPBAR));
+            guideEntry(tr(K_HP_T_OVERVIEW),   tr(K_HP_B_OVERVIEW));
+            guideEntry(tr(K_HP_T_MYTASKS),    tr(K_HP_B_MYTASKS));
+            guideEntry(tr(K_HP_T_TREE),       tr(K_HP_B_TREE));
+            guideEntry(tr(K_HP_T_TABLE),      tr(K_HP_B_TABLE));
+            guideEntry(tr(K_HP_T_DETAILS),    tr(K_HP_B_DETAILS));
+            guideEntry(tr(K_HP_T_ANALYTICS),  tr(K_HP_B_ANALYTICS));
+            guideEntry(tr(K_HP_T_BENCHMARK),  tr(K_HP_B_BENCHMARK));
+            guideEntry(tr(K_HP_T_STATUS),     tr(K_HP_B_STATUS));
+            guideEntry(tr(K_HP_T_MENU),       tr(K_HP_B_MENU));
+            guideEntry(tr(K_HP_T_VOICE),      tr(K_HP_B_VOICE));
+            guideEntry(tr(K_HP_T_KEYS),       tr(K_HP_B_KEYS));
 
             cardEnd();
         }
 
         void renderFinder(UiState& uiState) {
             cardBegin("##HelpFinder", 0.0f);
-            sectionHeading("Find lost task files",
-                "Searches your Documents folder (recursively) for *.dftasks files.");
+            sectionHeading(tr(K_HP_FINDER_HEADING), tr(K_HP_FINDER_SUB));
 
             ScanState& s = scanState();
 
-            if (gradientButton("##scanDocs", "Scan Documents", ImVec2(170.0f, 36.0f), 14.0f)) {
+            if (gradientButton("##scanDocs", tr(K_HP_SCAN_BTN), ImVec2(170.0f, 36.0f), 14.0f)) {
                 runScan();
                 if (!s.docsExist) {
-                    pushToast(uiState, "Documents folder not found.");
+                    pushToast(uiState, tr(K_TOAST_DOCS_NOT_FOUND));
                 } else {
                     char msg[96];
-                    std::snprintf(msg, sizeof(msg),
-                        "Scan complete: %zu file(s) found.", s.results.size());
+                    std::snprintf(msg, sizeof(msg), tr(K_TOAST_SCAN_DONE_FMT), s.results.size());
                     pushToast(uiState, msg);
                 }
             }
 
             ImGui::SameLine(0, 12.0f);
             if (s.ran) {
-                ImGui::TextColored(ColTextFaint, "Searched: %s",
-                    s.docsPath.empty() ? "(no Documents folder)" : s.docsPath.c_str());
+                ImGui::TextColored(ColTextFaint, tr(K_HP_SEARCHED_FMT),
+                    s.docsPath.empty() ? tr(K_HP_NO_DOCS_PATH) : s.docsPath.c_str());
             } else {
-                ImGui::TextColored(ColTextFaint,
-                    "Click to search %%USERPROFILE%%\\Documents.");
+                ImGui::TextColored(ColTextFaint, "%s", tr(K_HP_CLICK_TO_SEARCH));
             }
 
             ImGui::Dummy(ImVec2(1.0f, 10.0f));
@@ -261,30 +211,25 @@ namespace ui {
             ImGui::Dummy(ImVec2(1.0f, 8.0f));
 
             if (!s.ran) {
-                ImGui::TextColored(ColTextFaint,
-                    "Results appear here. Each row has a Load button.");
+                ImGui::TextColored(ColTextFaint, "%s", tr(K_HP_RESULTS_HINT));
                 cardEnd();
                 return;
             }
 
             if (!s.docsExist) {
-                ImGui::TextColored(HEX(0xDC2626),
-                    "Documents folder could not be located on this profile.");
+                ImGui::TextColored(HEX(0xDC2626), "%s", tr(K_HP_DOCS_MISSING));
                 cardEnd();
                 return;
             }
 
             if (s.results.empty()) {
-                ImGui::TextColored(ColTextFaint,
-                    "No .dftasks files were found under Documents.");
+                ImGui::TextColored(ColTextFaint, "%s", tr(K_HP_NO_DFTASKS));
                 cardEnd();
                 return;
             }
 
             ImGui::PushFont(fontUiSemibold());
-            ImGui::TextColored(ColTextSecondary,
-                "%zu file(s) found, sorted by most recently modified.",
-                s.results.size());
+            ImGui::TextColored(ColTextSecondary, tr(K_HP_FOUND_FMT), s.results.size());
             ImGui::PopFont();
             ImGui::Dummy(ImVec2(1.0f, 8.0f));
 
@@ -314,7 +259,7 @@ namespace ui {
                     formatSize(f.size).c_str(), formatMtime(f.mtime).c_str());
 
                 ImGui::SetCursorScreenPos(ImVec2(mx.x - 110.0f, mn.y + 18.0f));
-                if (gradientButton("##loadFound", "Load", ImVec2(96.0f, 32.0f), 12.0f)) {
+                if (gradientButton("##loadFound", tr(K_HP_LOAD), ImVec2(96.0f, 32.0f), 12.0f)) {
                     uiState.pendingFilePath   = f.path;
                     uiState.triggeredOpenPath = true;
                 }

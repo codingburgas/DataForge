@@ -433,7 +433,7 @@ namespace ui {
             ImGui::TextColored(ColTextPrimary, "%s", task.title.c_str());
             ImGui::PopFont();
 
-            std::string note = task.description.empty() ? "No task notes yet." : task.description;
+            std::string note = task.description.empty() ? std::string(tr(K_OV_NO_TASK_NOTES)) : task.description;
             if (note.size() > 72) {
                 note = note.substr(0, 72) + "...";
             }
@@ -451,7 +451,7 @@ namespace ui {
             std::string due = logic::formatDate(task.deadline);
             ImGui::SetCursorScreenPos(ImVec2(max.x - 94.0f, max.y - 32.0f));
             ImGui::PushFont(fontUiSemibold());
-            ImGui::TextColored(ColTextFaint, "%s", due.empty() ? "No due date" : due.c_str());
+            ImGui::TextColored(ColTextFaint, "%s", due.empty() ? tr(K_OV_NO_DUE) : due.c_str());
             ImGui::PopFont();
 
             ImGui::SetCursorScreenPos(min);
@@ -499,29 +499,29 @@ namespace ui {
             float metricGap = 14.0f;
             float metricW = (contentW - metricGap * 3.0f) * 0.25f;
             renderMetricCard("##metricAll", static_cast<int>(store.tasks.size()),
-                             "Total Tasks", inProgress > 0 ? "In progress now" : "Quiet queue",
+                             tr(K_OV_TOTAL_TASKS), inProgress > 0 ? tr(K_OV_IN_PROGRESS_NOW) : tr(K_OV_QUIET_QUEUE),
                              IM_COL32(124, 58, 237, 255), metricW);
             ImGui::SameLine(0, metricGap);
             renderMetricCard("##metricDone", completed,
-                             "Completed", "Shipping clean work",
+                             tr(K_OV_COMPLETED), tr(K_OV_SHIPPING_CLEAN),
                              IM_COL32(5, 150, 105, 255), metricW);
             ImGui::SameLine(0, metricGap);
             renderMetricCard("##metricRoot", static_cast<int>(roots.size()),
-                             "Active Projects", "Root task trees",
+                             tr(K_OV_ACTIVE_PROJECTS), tr(K_OV_ROOT_TREES),
                              IM_COL32(37, 99, 235, 255), metricW);
             ImGui::SameLine(0, metricGap);
             renderMetricCard("##metricBlocked", blocked,
-                             "Blocked", blocked > 0 ? "Needs attention" : "No blockers",
+                             tr(K_OV_BLOCKED), blocked > 0 ? tr(K_OV_NEEDS_ATTENTION) : tr(K_OV_NO_BLOCKERS),
                              IM_COL32(220, 38, 38, 255), metricW);
 
             ImGui::Dummy(ImVec2(1.0f, 18.0f));
             ImGui::PushFont(fontHeading());
-            ImGui::TextColored(ColTextPrimary, "Today's Focus");
+            ImGui::TextColored(ColTextPrimary, "%s", tr(K_OV_TODAYS_FOCUS));
             ImGui::PopFont();
             ImGui::SameLine();
             ImGui::SetCursorPosX(mainW - 90.0f);
             ImGui::PushFont(fontUiSemibold());
-            ImGui::TextColored(HEX(0x7C3AED), "+ Add task");
+            ImGui::TextColored(HEX(0x7C3AED), "%s", tr(K_OV_ADD_TASK));
             ImGui::PopFont();
             if (ImGui::IsItemClicked()) {
                 openCreateDialog(uiState, uiState.selectedTaskId);
@@ -530,7 +530,7 @@ namespace ui {
             ImGui::Dummy(ImVec2(1.0f, 8.0f));
 
             if (focus.empty()) {
-                ImGui::TextColored(ColTextFaint, "No active tasks yet. Create one to start the board.");
+                ImGui::TextColored(ColTextFaint, "%s", tr(K_OV_NO_ACTIVE));
             } else {
                 for (const data::Task& t : focus) {
                     renderOverviewTaskCard(t, uiState, contentW);
@@ -547,12 +547,12 @@ namespace ui {
             float sideContentW = ImGui::GetContentRegionAvail().x;
 
             ImGui::PushFont(fontHeading());
-            ImGui::TextColored(ColTextPrimary, "Active Projects");
+            ImGui::TextColored(ColTextPrimary, "%s", tr(K_OV_ACTIVE_PROJECTS_HEADING));
             ImGui::PopFont();
             ImGui::Dummy(ImVec2(1.0f, 8.0f));
 
             if (roots.empty()) {
-                ImGui::TextColored(ColTextFaint, "No root projects yet.");
+                ImGui::TextColored(ColTextFaint, "%s", tr(K_OV_NO_ROOT_PROJECTS));
             } else {
                 for (std::size_t i = 0; i < roots.size() && i < 4; ++i) {
                     const data::Task* root = data::findTaskInStoreConst(store, roots[i]);
@@ -579,7 +579,7 @@ namespace ui {
                     renderProgressRing(ImVec2(max.x - 26.0f, min.y + 27.0f), 12.0f, 3.0f,
                                        completion * 100.0f, accent);
                     ImGui::SetCursorScreenPos(ImVec2(min.x + 32.0f, min.y + 40.0f));
-                    ImGui::TextColored(ColTextFaint, "%d subtasks  |  %.0f%% done",
+                    ImGui::TextColored(ColTextFaint, tr(K_OV_SUBTASKS_DONE_FMT),
                                        logic::countDescendants(store, root->id),
                                        completion * 100.0f);
                     ImGui::PopTextWrapPos();
@@ -597,12 +597,12 @@ namespace ui {
 
             ImGui::Dummy(ImVec2(1.0f, 12.0f));
             ImGui::PushFont(fontHeading());
-            ImGui::TextColored(ColTextPrimary, "Recent Activity");
+            ImGui::TextColored(ColTextPrimary, "%s", tr(K_OV_RECENT_ACTIVITY));
             ImGui::PopFont();
             ImGui::Dummy(ImVec2(1.0f, 8.0f));
 
             if (recent.empty()) {
-                ImGui::TextColored(ColTextFaint, "Nothing recent yet.");
+                ImGui::TextColored(ColTextFaint, "%s", tr(K_OV_NOTHING_RECENT));
             } else {
                 for (const data::Task* recentPtr : recent) {
                     const data::Task& task = *recentPtr;
@@ -624,7 +624,7 @@ namespace ui {
                     ImGui::SetCursorScreenPos(ImVec2(min.x + 44.0f, min.y + 28.0f));
                     ImGui::TextColored(ColTextFaint, "%s",
                                        logic::formatDate(task.updatedAt).empty()
-                                           ? "Updated recently"
+                                           ? tr(K_OV_UPDATED_RECENTLY)
                                            : logic::formatDate(task.updatedAt).c_str());
                     ImGui::PopTextWrapPos();
                     ImGui::Dummy(ImVec2(1.0f, 64.0f));

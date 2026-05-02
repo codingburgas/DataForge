@@ -1,5 +1,6 @@
 #include "ui/stats_panel.h"
 #include "ui/theme.h"
+#include "ui/i18n.h"
 #include "logic/recursion.h"
 #include "logic/tasks.h"
 #include "logic/dates.h"
@@ -90,9 +91,9 @@ namespace ui {
         std::vector<int> roots = logic::rootTaskIds(store);
 
         ImGui::PushFont(fontHeading());
-        ImGui::TextColored(ColTextPrimary, "Workspace Analytics");
+        ImGui::TextColored(ColTextPrimary, "%s", tr(K_ST_HEADING));
         ImGui::PopFont();
-        ImGui::TextColored(ColTextMuted, "Measure task mix, delivery risk, and project completion in one place.");
+        ImGui::TextColored(ColTextMuted, "%s", tr(K_ST_SUBTITLE));
         ImGui::Dummy(ImVec2(1.0f, 18.0f));
 
         float avail = ImGui::GetContentRegionAvail().x;
@@ -110,16 +111,16 @@ namespace ui {
         char minutesBuf[32];
         std::snprintf(minutesBuf, sizeof(minutesBuf), "%lldh %02lldm", totalMins / 60, totalMins % 60);
 
-        renderStatCard("##stTotal", "Total Tasks", totalBuf, minutesBuf,
+        renderStatCard("##stTotal", tr(K_ST_TOTAL_TASKS), totalBuf, minutesBuf,
                        IM_COL32(124, 58, 237, 255), cardW);
         ImGui::SameLine(0, gap);
-        renderStatCard("##stDone", "Completed", completedBuf, "Finished work",
+        renderStatCard("##stDone", tr(K_ST_COMPLETED), completedBuf, tr(K_ST_FINISHED_WORK),
                        IM_COL32(5, 150, 105, 255), cardW);
         ImGui::SameLine(0, gap);
-        renderStatCard("##stRoots", "Root Projects", rootsBuf, "Top-level trees",
+        renderStatCard("##stRoots", tr(K_ST_ROOT_PROJECTS), rootsBuf, tr(K_ST_TOP_LEVEL_TREES),
                        IM_COL32(37, 99, 235, 255), cardW);
         ImGui::SameLine(0, gap);
-        renderStatCard("##stOverdue", "Overdue", overdueBuf, overdue > 0 ? "Needs attention" : "Healthy",
+        renderStatCard("##stOverdue", tr(K_ST_OVERDUE), overdueBuf, overdue > 0 ? tr(K_ST_NEEDS_ATTENTION) : tr(K_ST_HEALTHY),
                        IM_COL32(220, 38, 38, 255), cardW);
 
         ImGui::Dummy(ImVec2(1.0f, 18.0f));
@@ -136,7 +137,7 @@ namespace ui {
         float analyticsW = ImGui::GetContentRegionAvail().x;
 
         ImGui::PushFont(fontHeading());
-        ImGui::TextColored(ColTextPrimary, "Priority distribution");
+        ImGui::TextColored(ColTextPrimary, "%s", tr(K_ST_PRIORITY_DIST));
         ImGui::PopFont();
         ImGui::Dummy(ImVec2(1.0f, 8.0f));
         ImU32 priCols[4] = {
@@ -155,7 +156,7 @@ namespace ui {
 
         ImGui::Dummy(ImVec2(1.0f, 18.0f));
         ImGui::PushFont(fontHeading());
-        ImGui::TextColored(ColTextPrimary, "Status distribution");
+        ImGui::TextColored(ColTextPrimary, "%s", tr(K_ST_STATUS_DIST));
         ImGui::PopFont();
         ImGui::Dummy(ImVec2(1.0f, 8.0f));
         ImU32 stCols[4] = {
@@ -174,12 +175,12 @@ namespace ui {
 
         ImGui::Dummy(ImVec2(1.0f, 18.0f));
         ImGui::PushFont(fontHeading());
-        ImGui::TextColored(ColTextPrimary, "Project health");
+        ImGui::TextColored(ColTextPrimary, "%s", tr(K_ST_PROJECT_HEALTH));
         ImGui::PopFont();
         ImGui::Dummy(ImVec2(1.0f, 10.0f));
 
         if (roots.empty()) {
-            ImGui::TextColored(ColTextFaint, "No root projects yet.");
+            ImGui::TextColored(ColTextFaint, "%s", tr(K_ST_NO_ROOTS));
         } else {
             for (int rootId : roots) {
                 const data::Task* root = data::findTaskInStoreConst(store, rootId);
@@ -205,7 +206,7 @@ namespace ui {
                 ImGui::PopFont();
                 ImGui::SetCursorScreenPos(ImVec2(min.x + 64.0f, min.y + 42.0f));
                 ImGui::TextColored(ColTextFaint,
-                                   "%dh %02dm  |  %d subtasks  |  depth %d",
+                                   tr(K_ST_PROJECT_DETAIL_FMT),
                                    logic::calculateTotalEstimatedMinutes(store, root->id) / 60,
                                    logic::calculateTotalEstimatedMinutes(store, root->id) % 60,
                                    logic::countDescendants(store, root->id),
@@ -227,7 +228,7 @@ namespace ui {
         float signalsW = ImGui::GetContentRegionAvail().x;
 
         ImGui::PushFont(fontHeading());
-        ImGui::TextColored(ColTextPrimary, "Signals");
+        ImGui::TextColored(ColTextPrimary, "%s", tr(K_ST_SIGNALS));
         ImGui::PopFont();
         ImGui::Dummy(ImVec2(1.0f, 8.0f));
 
@@ -238,16 +239,16 @@ namespace ui {
         dl->AddRect(cardMin, cardMax, cardBorderU32(), 18.0f);
         ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 16.0f, cardMin.y + 18.0f));
         ImGui::PushFont(fontUiSemibold());
-        ImGui::TextColored(ColTextPrimary, "Overdue pressure");
+        ImGui::TextColored(ColTextPrimary, "%s", tr(K_ST_OVERDUE_PRESSURE));
         ImGui::PopFont();
         ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 16.0f, cardMin.y + 48.0f));
         ImGui::PushFont(fontDisplay());
         ImGui::TextColored(overdue > 0 ? HEX(0xDC2626) : HEX(0x059669), "%d", overdue);
         ImGui::PopFont();
         ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 16.0f, cardMin.y + 88.0f));
-        ImGui::TextColored(ColTextFaint,
-                           overdue > 0 ? "Tasks are overdue and should be reviewed."
-                                       : "No overdue items right now.");
+        ImGui::TextColored(ColTextFaint, "%s",
+                           overdue > 0 ? tr(K_ST_OVERDUE_BODY)
+                                       : tr(K_ST_OVERDUE_NONE));
         ImGui::Dummy(ImVec2(1.0f, 168.0f));
 
         cardMin = ImGui::GetCursorScreenPos();
@@ -256,16 +257,16 @@ namespace ui {
         dl->AddRect(cardMin, cardMax, cardBorderU32(), 18.0f);
         ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 16.0f, cardMin.y + 18.0f));
         ImGui::PushFont(fontUiSemibold());
-        ImGui::TextColored(ColTextPrimary, "Execution mix");
+        ImGui::TextColored(ColTextPrimary, "%s", tr(K_ST_EXEC_MIX));
         ImGui::PopFont();
         ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 16.0f, cardMin.y + 50.0f));
-        ImGui::TextColored(ColTextMuted, "%.0f in progress", byStatus[data::STATUS_IN_PROGRESS]);
+        ImGui::TextColored(ColTextMuted, tr(K_ST_IN_PROGRESS_FMT), byStatus[data::STATUS_IN_PROGRESS]);
         ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 16.0f, cardMin.y + 74.0f));
-        ImGui::TextColored(ColTextMuted, "%.0f blocked", byStatus[data::STATUS_BLOCKED]);
+        ImGui::TextColored(ColTextMuted, tr(K_ST_BLOCKED_FMT), byStatus[data::STATUS_BLOCKED]);
         ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 16.0f, cardMin.y + 98.0f));
-        ImGui::TextColored(ColTextMuted, "%.0f done", byStatus[data::STATUS_DONE]);
+        ImGui::TextColored(ColTextMuted, tr(K_ST_DONE_FMT), byStatus[data::STATUS_DONE]);
         ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 16.0f, cardMin.y + 122.0f));
-        ImGui::TextColored(ColTextFaint, "Use this to gauge whether work is flowing or stalling.");
+        ImGui::TextColored(ColTextFaint, "%s", tr(K_ST_FLOW_HINT));
         ImGui::Dummy(ImVec2(1.0f, 168.0f));
 
         ImGui::EndChild();
