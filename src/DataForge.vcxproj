@@ -153,6 +153,7 @@
     <ClCompile Include="logic\benchmark.cpp" />
     <ClCompile Include="logic\dates.cpp" />
     <ClCompile Include="ui\ui_state.cpp" />
+    <ClCompile Include="ui\i18n.cpp" />
     <ClCompile Include="ui\app_shell.cpp" />
     <ClCompile Include="ui\menu_bar.cpp" />
     <ClCompile Include="ui\task_tree.cpp" />
@@ -191,6 +192,7 @@
     <ClInclude Include="headerStaticLibrary\include\logic\benchmark.h" />
     <ClInclude Include="headerStaticLibrary\include\logic\dates.h" />
     <ClInclude Include="headerStaticLibrary\include\ui\ui_state.h" />
+    <ClInclude Include="headerStaticLibrary\include\ui\i18n.h" />
     <ClInclude Include="headerStaticLibrary\include\ui\app_shell.h" />
     <ClInclude Include="headerStaticLibrary\include\ui\menu_bar.h" />
     <ClInclude Include="headerStaticLibrary\include\ui\task_tree.h" />

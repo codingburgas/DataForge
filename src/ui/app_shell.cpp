@@ -11,6 +11,7 @@
 #include "ui/toast.h"
 #include "ui/shortcuts.h"
 #include "ui/theme.h"
+#include "ui/i18n.h"
 #include "logic/tasks.h"
 #include "logic/recursion.h"
 #include "logic/dates.h"
@@ -63,22 +64,22 @@ namespace ui {
 
         const char* pageTitle(NavItem item) {
             switch (item) {
-                case NAV_OVERVIEW:  return "Overview";
-                case NAV_TASKS:     return "My Tasks";
-                case NAV_ANALYTICS: return "Analytics";
-                case NAV_BENCHMARK: return "Benchmark";
-                case NAV_HELP:      return "Help";
+                case NAV_OVERVIEW:  return tr(K_PAGE_OVERVIEW);
+                case NAV_TASKS:     return tr(K_PAGE_TASKS);
+                case NAV_ANALYTICS: return tr(K_PAGE_ANALYTICS);
+                case NAV_BENCHMARK: return tr(K_PAGE_BENCHMARK);
+                case NAV_HELP:      return tr(K_PAGE_HELP);
             }
-            return "Workspace";
+            return tr(K_PAGE_WORKSPACE);
         }
 
         const char* pageSubtitle(NavItem item) {
             switch (item) {
-                case NAV_OVERVIEW:  return "Here is what is moving across the workspace.";
-                case NAV_TASKS:     return "Manage hierarchy, focus work, and edit task details.";
-                case NAV_ANALYTICS: return "Track delivery health, workload mix, and project progress.";
-                case NAV_BENCHMARK: return "Compare sorting strategies on synthetic task sets.";
-                case NAV_HELP:      return "Workspace guides and recovery tools for lost task files.";
+                case NAV_OVERVIEW:  return tr(K_SUB_OVERVIEW);
+                case NAV_TASKS:     return tr(K_SUB_TASKS);
+                case NAV_ANALYTICS: return tr(K_SUB_ANALYTICS);
+                case NAV_BENCHMARK: return tr(K_SUB_BENCHMARK);
+                case NAV_HELP:      return tr(K_SUB_HELP);
             }
             return "";
         }
@@ -88,12 +89,12 @@ namespace ui {
             std::tm local{};
             localtime_s(&local, &now);
             if (local.tm_hour < 12) {
-                return "Good morning";
+                return tr(K_GREETING_MORNING);
             }
             if (local.tm_hour < 18) {
-                return "Good afternoon";
+                return tr(K_GREETING_AFTERNOON);
             }
-            return "Good evening";
+            return tr(K_GREETING_EVENING);
         }
 
         void drawNavIcon(ImDrawList* dl, ImVec2 centre, NavItem item, ImU32 color) {
@@ -190,7 +191,7 @@ namespace ui {
                 ImGui::TextColored(ColTextPrimary, "DataForge");
                 ImGui::PopFont();
                 ImGui::SetCursorPos(ImVec2(64.0f, 42.0f));
-                ImGui::TextColored(ColTextFaint, "Workspace");
+                ImGui::TextColored(ColTextFaint, "%s", tr(K_SIDEBAR_LOGO_SUB));
             }
 
             dl->AddLine(ImVec2(origin.x, origin.y + 68.0f),
@@ -198,12 +199,12 @@ namespace ui {
                         cardBorderU32());
 
             struct NavDef { NavItem item; const char* label; };
-            static const NavDef navItems[] = {
-                { NAV_OVERVIEW,  "Overview"  },
-                { NAV_TASKS,     "My Tasks"  },
-                { NAV_ANALYTICS, "Analytics" },
-                { NAV_BENCHMARK, "Benchmark" },
-                { NAV_HELP,      "Help"      }
+            const NavDef navItems[] = {
+                { NAV_OVERVIEW,  tr(K_NAV_OVERVIEW)  },
+                { NAV_TASKS,     tr(K_NAV_TASKS)     },
+                { NAV_ANALYTICS, tr(K_NAV_ANALYTICS) },
+                { NAV_BENCHMARK, tr(K_NAV_BENCHMARK) },
+                { NAV_HELP,      tr(K_NAV_HELP)      }
             };
             const int navItemCount = static_cast<int>(IM_ARRAYSIZE(navItems));
 
@@ -257,10 +258,10 @@ namespace ui {
                 ImGui::PushTextWrapPos(cardMax.x - 14.0f);
                 ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 14.0f, cardMin.y + 12.0f));
                 ImGui::PushFont(fontUiSemibold());
-                ImGui::TextColored(ColTextPrimary, "%d root projects", rootCount);
+                ImGui::TextColored(ColTextPrimary, tr(K_SIDEBAR_ROOT_PROJECTS_FMT), rootCount);
                 ImGui::PopFont();
                 ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 14.0f, cardMin.y + 32.0f));
-                ImGui::TextColored(ColTextMuted, "%d tasks across the current store", totalTasks);
+                ImGui::TextColored(ColTextMuted, tr(K_SIDEBAR_TASKS_ACROSS_FMT), totalTasks);
                 ImGui::PopTextWrapPos();
             }
 
@@ -269,7 +270,7 @@ namespace ui {
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ColBgHover);
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, ColBgActive);
             ImGui::PushStyleColor(ImGuiCol_Text, ColTextMuted);
-            if (ImGui::Button(expanded ? "Collapse" : "Expand", ImVec2(sidebarW - 24.0f, 30.0f))) {
+            if (ImGui::Button(expanded ? tr(K_SIDEBAR_COLLAPSE) : tr(K_SIDEBAR_EXPAND), ImVec2(sidebarW - 24.0f, 30.0f))) {
                 uiState.sidebarExpanded = !uiState.sidebarExpanded;
             }
             ImGui::PopStyleColor(4);
@@ -319,9 +320,9 @@ namespace ui {
             ImGui::PopFont();
 
             ImGui::SetCursorPos(ImVec2(8.0f, 42.0f));
-            ImGui::TextColored(ColTextFaint,
+            ImGui::TextColored(ColTextFaint, "%s",
                                uiState.activeNavItem == NAV_OVERVIEW
-                                   ? "Here is what is on your plate today."
+                                   ? tr(K_OVERVIEW_TOPBAR_SUB)
                                    : subtitle);
 
             data::Date today = logic::today();
@@ -339,7 +340,7 @@ namespace ui {
                         ImVec2(chipMin.x + 21.0f, chipMin.y + 17.0f),
                         IM_COL32(149, 162, 180, 255), 1.2f);
             ImGui::SetCursorScreenPos(ImVec2(chipMin.x + 32.0f, chipMin.y + 7.0f));
-            ImGui::TextColored(ColTextMuted, "%s", todayText.empty() ? "Today" : todayText.c_str());
+            ImGui::TextColored(ColTextMuted, "%s", todayText.empty() ? tr(K_TODAY_LABEL) : todayText.c_str());
 
             ImVec2 saveMin = ImVec2(pos.x + width - 244.0f, pos.y + 20.0f);
             ImVec2 saveMax = ImVec2(pos.x + width - 168.0f, pos.y + 52.0f);
@@ -353,11 +354,11 @@ namespace ui {
             ImGui::SetCursorScreenPos(ImVec2(saveMin.x + 14.0f, saveMin.y + 7.0f));
             ImGui::PushFont(fontUiSemibold());
             ImGui::TextColored(ImGui::ColorConvertU32ToFloat4(saveTx),
-                               "%s", store.dirty ? "Unsaved" : "Ready");
+                               "%s", store.dirty ? tr(K_STATE_UNSAVED) : tr(K_STATE_READY));
             ImGui::PopFont();
 
             ImGui::SetCursorScreenPos(ImVec2(pos.x + width - 156.0f, pos.y + 18.0f));
-            if (gradientButton("##newTaskTopbar", "+  New Task", ImVec2(148.0f, 36.0f), 16.0f)) {
+            if (gradientButton("##newTaskTopbar", tr(K_NEW_TASK_BTN), ImVec2(148.0f, 36.0f), 16.0f)) {
                 openCreateDialog(uiState, uiState.selectedTaskId);
             }
 

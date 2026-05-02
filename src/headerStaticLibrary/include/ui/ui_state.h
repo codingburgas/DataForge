@@ -4,6 +4,7 @@
 #include "data/types.h"
 #include "logic/sort.h"
 #include "logic/benchmark.h"
+#include "ui/i18n.h"
 
 namespace ui {
 
@@ -77,6 +78,8 @@ namespace ui {
 
         bool    sidebarExpanded;
         NavItem activeNavItem;
+
+        Language language;
 
         EditBuffers edit;
     };

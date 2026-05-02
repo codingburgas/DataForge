@@ -32,6 +32,7 @@
     <ClCompile Include="logic\benchmark.cpp">  <Filter>logic</Filter>    </ClCompile>
     <ClCompile Include="logic\dates.cpp">      <Filter>logic</Filter>    </ClCompile>
     <ClCompile Include="ui\ui_state.cpp">       <Filter>ui</Filter>      </ClCompile>
+    <ClCompile Include="ui\i18n.cpp">           <Filter>ui</Filter>      </ClCompile>
     <ClCompile Include="ui\app_shell.cpp">      <Filter>ui</Filter>      </ClCompile>
     <ClCompile Include="ui\menu_bar.cpp">       <Filter>ui</Filter>      </ClCompile>
     <ClCompile Include="ui\task_tree.cpp">      <Filter>ui</Filter>      </ClCompile>
@@ -70,6 +71,7 @@
     <ClInclude Include="headerStaticLibrary\include\logic\benchmark.h">  <Filter>logic</Filter> </ClInclude>
     <ClInclude Include="headerStaticLibrary\include\logic\dates.h">      <Filter>logic</Filter> </ClInclude>
     <ClInclude Include="headerStaticLibrary\include\ui\ui_state.h">       <Filter>ui</Filter>   </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\ui\i18n.h">           <Filter>ui</Filter>   </ClInclude>
     <ClInclude Include="headerStaticLibrary\include\ui\app_shell.h">      <Filter>ui</Filter>   </ClInclude>
     <ClInclude Include="headerStaticLibrary\include\ui\menu_bar.h">       <Filter>ui</Filter>   </ClInclude>
     <ClInclude Include="headerStaticLibrary\include\ui\task_tree.h">      <Filter>ui</Filter>   </ClInclude>

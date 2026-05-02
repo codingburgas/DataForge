@@ -106,6 +106,9 @@ namespace ui {
         ui.sidebarExpanded = true;
         ui.activeNavItem   = NAV_OVERVIEW;
 
+        ui.language = LANG_EN;
+        setLanguage(ui.language);
+
         clearEditBuffers(ui.edit);
     }
 

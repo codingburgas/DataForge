@@ -1,5 +1,6 @@
 #include "ui/status_bar.h"
 #include "ui/theme.h"
+#include "ui/i18n.h"
 #include "logic/recursion.h"
 #include "logic/dates.h"
 #include "imgui.h"
@@ -48,10 +49,10 @@ namespace ui {
             ImGui::SetCursorScreenPos(ImVec2(chipMin.x + 22.0f, chipMin.y + 4.0f));
             ImGui::PushFont(fontUiSemibold());
             ImGui::TextColored(ImGui::ColorConvertU32ToFloat4(chipTx),
-                               "%s", store.dirty ? "Unsaved" : "Saved");
+                               "%s", store.dirty ? tr(K_STATE_UNSAVED) : tr(K_STATE_SAVED));
             ImGui::PopFont();
 
-            std::string filePath = store.filePath.empty() ? "No file selected" : store.filePath;
+            std::string filePath = store.filePath.empty() ? std::string(tr(K_STATUS_NO_FILE)) : store.filePath;
             ImGui::SetCursorPos(ImVec2(104.0f, 8.0f));
             ImGui::TextColored(ColTextFaint, "%s", filePath.c_str());
 
@@ -61,10 +62,10 @@ namespace ui {
             if (right < 360.0f) right = 360.0f;
             ImGui::SameLine(right);
             if (overdue > 0) {
-                ImGui::TextColored(HEX(0xDC2626), "%d overdue", overdue);
+                ImGui::TextColored(HEX(0xDC2626), tr(K_STATUS_OVERDUE_FMT), overdue);
                 ImGui::SameLine(0, 16.0f);
             }
-            ImGui::TextColored(ColTextMuted, "%d tasks", total);
+            ImGui::TextColored(ColTextMuted, tr(K_STATUS_TASKS_FMT), total);
         }
         ImGui::End();
         ImGui::PopStyleVar();
