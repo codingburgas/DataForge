@@ -109,6 +109,10 @@ namespace ui {
         }
 
         if (ImGui::BeginMenu("Help")) {
+            if (ImGui::MenuItem("User Guide", nullptr, uiState.activeNavItem == NAV_HELP)) {
+                uiState.activeNavItem = NAV_HELP;
+            }
+            ImGui::Separator();
             if (ImGui::MenuItem("About DataForge")) uiState.showAboutPopup = true;
             ImGui::EndMenu();
         }

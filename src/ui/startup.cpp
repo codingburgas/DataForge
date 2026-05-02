@@ -56,6 +56,25 @@ namespace {
                 }
             }
         }
+        if (uiState.triggeredOpenPath) {
+            uiState.triggeredOpenPath = false;
+            std::string path = uiState.pendingFilePath;
+            uiState.pendingFilePath.clear();
+            if (!path.empty()) {
+                if (store.dirty) {
+                    ui::pushToast(uiState, "Save current store before loading another file.");
+                } else {
+                    std::string err;
+                    if (logic::loadStore(store, path, err)) {
+                        uiState.selectedTaskId  = -1;
+                        uiState.hasUndoSnapshot = false;
+                        ui::pushToast(uiState, "Opened: " + path);
+                    } else {
+                        ui::pushToast(uiState, "Open failed: " + err);
+                    }
+                }
+            }
+        }
         if (uiState.triggeredSave) {
             uiState.triggeredSave = false;
             if (store.filePath.empty()) {

@@ -11,7 +11,8 @@ namespace ui {
         NAV_OVERVIEW = 0,
         NAV_TASKS = 1,
         NAV_ANALYTICS = 2,
-        NAV_BENCHMARK = 3
+        NAV_BENCHMARK = 3,
+        NAV_HELP = 4
     };
 
     constexpr int SEARCH_BUF_SIZE   = 256;
@@ -57,6 +58,7 @@ namespace ui {
         bool triggeredSave;
         bool triggeredSaveAs;
         bool triggeredOpen;
+        bool triggeredOpenPath;
         bool triggeredNew;
 
         std::string pendingFilePath;

@@ -6,6 +6,7 @@
 #include "ui/dialogs.h"
 #include "ui/stats_panel.h"
 #include "ui/benchmark_panel.h"
+#include "ui/help_panel.h"
 #include "ui/status_bar.h"
 #include "ui/toast.h"
 #include "ui/shortcuts.h"
@@ -74,6 +75,7 @@ namespace ui {
                 case NAV_TASKS:     return "My Tasks";
                 case NAV_ANALYTICS: return "Analytics";
                 case NAV_BENCHMARK: return "Benchmark";
+                case NAV_HELP:      return "Help";
             }
             return "Workspace";
         }
@@ -84,6 +86,7 @@ namespace ui {
                 case NAV_TASKS:     return "Manage hierarchy, focus work, and edit task details.";
                 case NAV_ANALYTICS: return "Track delivery health, workload mix, and project progress.";
                 case NAV_BENCHMARK: return "Compare sorting strategies on synthetic task sets.";
+                case NAV_HELP:      return "Workspace guides and recovery tools for lost task files.";
             }
             return "";
         }
@@ -134,6 +137,12 @@ namespace ui {
                     dl->AddCircleFilled(ImVec2(centre.x + 2.0f, centre.y - 1.0f), 1.5f, color);
                     dl->AddLine(ImVec2(centre.x - 4.0f, centre.y + 3.0f),
                                 ImVec2(centre.x + 4.0f, centre.y + 3.0f), color, 1.5f);
+                    break;
+                case NAV_HELP:
+                    dl->AddCircle(ImVec2(centre.x, centre.y), 7.0f, color, 0, 1.5f);
+                    dl->AddLine(ImVec2(centre.x, centre.y - 3.0f),
+                                ImVec2(centre.x, centre.y + 1.0f), color, 1.6f);
+                    dl->AddCircleFilled(ImVec2(centre.x, centre.y + 4.0f), 1.2f, color);
                     break;
             }
         }
@@ -201,11 +210,13 @@ namespace ui {
                 { NAV_OVERVIEW,  "Overview"  },
                 { NAV_TASKS,     "My Tasks"  },
                 { NAV_ANALYTICS, "Analytics" },
-                { NAV_BENCHMARK, "Benchmark" }
+                { NAV_BENCHMARK, "Benchmark" },
+                { NAV_HELP,      "Help"      }
             };
+            const int navItemCount = static_cast<int>(IM_ARRAYSIZE(navItems));
 
             ImGui::SetCursorPosY(84.0f);
-            for (int i = 0; i < 4; ++i) {
+            for (int i = 0; i < navItemCount; ++i) {
                 const NavDef& nav = navItems[i];
                 bool active = uiState.activeNavItem == nav.item;
                 ImVec2 btnPos = ImGui::GetCursorScreenPos();
@@ -709,6 +720,9 @@ namespace ui {
                     break;
                 case NAV_BENCHMARK:
                     renderBenchmarkPanel(uiState);
+                    break;
+                case NAV_HELP:
+                    renderHelpPanel(store, uiState);
                     break;
             }
 

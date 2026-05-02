@@ -161,6 +161,7 @@
     <ClCompile Include="ui\dialogs.cpp" />
     <ClCompile Include="ui\stats_panel.cpp" />
     <ClCompile Include="ui\benchmark_panel.cpp" />
+    <ClCompile Include="ui\help_panel.cpp" />
     <ClCompile Include="ui\status_bar.cpp" />
     <ClCompile Include="ui\toast.cpp" />
     <ClCompile Include="ui\theme.cpp" />
@@ -198,6 +199,7 @@
     <ClInclude Include="headerStaticLibrary\include\ui\dialogs.h" />
     <ClInclude Include="headerStaticLibrary\include\ui\stats_panel.h" />
     <ClInclude Include="headerStaticLibrary\include\ui\benchmark_panel.h" />
+    <ClInclude Include="headerStaticLibrary\include\ui\help_panel.h" />
     <ClInclude Include="headerStaticLibrary\include\ui\status_bar.h" />
     <ClInclude Include="headerStaticLibrary\include\ui\toast.h" />
     <ClInclude Include="headerStaticLibrary\include\ui\theme.h" />

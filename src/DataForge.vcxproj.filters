@@ -40,6 +40,7 @@
     <ClCompile Include="ui\dialogs.cpp">        <Filter>ui</Filter>      </ClCompile>
     <ClCompile Include="ui\stats_panel.cpp">    <Filter>ui</Filter>      </ClCompile>
     <ClCompile Include="ui\benchmark_panel.cpp"><Filter>ui</Filter>      </ClCompile>
+    <ClCompile Include="ui\help_panel.cpp">     <Filter>ui</Filter>      </ClCompile>
     <ClCompile Include="ui\status_bar.cpp">     <Filter>ui</Filter>      </ClCompile>
     <ClCompile Include="ui\toast.cpp">          <Filter>ui</Filter>      </ClCompile>
     <ClCompile Include="ui\theme.cpp">          <Filter>ui</Filter>      </ClCompile>
@@ -77,6 +78,7 @@
     <ClInclude Include="headerStaticLibrary\include\ui\dialogs.h">        <Filter>ui</Filter>   </ClInclude>
     <ClInclude Include="headerStaticLibrary\include\ui\stats_panel.h">    <Filter>ui</Filter>   </ClInclude>
     <ClInclude Include="headerStaticLibrary\include\ui\benchmark_panel.h"><Filter>ui</Filter>   </ClInclude>
+    <ClInclude Include="headerStaticLibrary\include\ui\help_panel.h">     <Filter>ui</Filter>   </ClInclude>
     <ClInclude Include="headerStaticLibrary\include\ui\status_bar.h">     <Filter>ui</Filter>   </ClInclude>
     <ClInclude Include="headerStaticLibrary\include\ui\toast.h">          <Filter>ui</Filter>   </ClInclude>
     <ClInclude Include="headerStaticLibrary\include\ui\theme.h">          <Filter>ui</Filter>   </ClInclude>

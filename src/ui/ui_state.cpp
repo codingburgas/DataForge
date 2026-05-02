@@ -85,8 +85,9 @@ namespace ui {
         ui.requestedQuit   = false;
         ui.triggeredSave   = false;
         ui.triggeredSaveAs = false;
-        ui.triggeredOpen   = false;
-        ui.triggeredNew    = false;
+        ui.triggeredOpen     = false;
+        ui.triggeredOpenPath = false;
+        ui.triggeredNew      = false;
 
         ui.pendingFilePath.clear();
 
