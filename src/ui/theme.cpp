@@ -7,6 +7,8 @@ namespace ui {
 
     namespace {
 
+        bool gDark = false;
+
         ImFont* gFontUi          = nullptr;
         ImFont* gFontUiSemibold  = nullptr;
         ImFont* gFontHeading     = nullptr;
@@ -111,6 +113,44 @@ namespace ui {
         return fallbackFont(gFontMono != nullptr ? gFontMono : gFontUi);
     }
 
+    namespace {
+
+        void setLightPalette() {
+            ColBgBase        = HEX(0xF6F8FC);
+            ColBgSubtle      = HEX(0xEEF3F8);
+            ColBgCard        = HEX(0xFFFFFF);
+            ColBgCardSoft    = HEX(0xFBFCFE);
+            ColBgActive      = HEX(0xEEE8FF);
+            ColBgHover       = HEX(0xF7F4FF);
+            ColBorder        = HEX(0xDCE5F0);
+            ColBorderStrong  = HEX(0xC8D5E4);
+            ColTextPrimary   = HEX(0x162033);
+            ColTextSecondary = HEX(0x344256);
+            ColTextMuted     = HEX(0x63748A);
+            ColTextFaint     = HEX(0x95A2B4);
+            ColShadow        = HEX(0x0F172A, 0.08f);
+            ColShadowStrong  = HEX(0x0F172A, 0.14f);
+        }
+
+        void setDarkPalette() {
+            ColBgBase        = HEX(0x0F172A);
+            ColBgSubtle      = HEX(0x1B2336);
+            ColBgCard        = HEX(0x162033);
+            ColBgCardSoft    = HEX(0x121B2C);
+            ColBgActive      = HEX(0x2A2055);
+            ColBgHover       = HEX(0x232B45);
+            ColBorder        = HEX(0x2A3447);
+            ColBorderStrong  = HEX(0x3A465D);
+            ColTextPrimary   = HEX(0xE8EEF7);
+            ColTextSecondary = HEX(0xC1CAD8);
+            ColTextMuted     = HEX(0x8D99AC);
+            ColTextFaint     = HEX(0x5F6A7E);
+            ColShadow        = HEX(0x000000, 0.35f);
+            ColShadowStrong  = HEX(0x000000, 0.55f);
+        }
+
+    }
+
     void applyTheme() {
         ImGuiStyle& s = ImGui::GetStyle();
 
@@ -144,7 +184,7 @@ namespace ui {
         c[ImGuiCol_BorderShadow]       = ImVec4(0, 0, 0, 0);
 
         c[ImGuiCol_FrameBg]            = ColBgSubtle;
-        c[ImGuiCol_FrameBgHovered]     = HEX(0xF3F6FB);
+        c[ImGuiCol_FrameBgHovered]     = gDark ? HEX(0x232B45) : HEX(0xF3F6FB);
         c[ImGuiCol_FrameBgActive]      = ColBgActive;
 
         c[ImGuiCol_TitleBg]            = ColBgCard;
@@ -154,9 +194,9 @@ namespace ui {
         c[ImGuiCol_MenuBarBg]          = ColBgCard;
 
         c[ImGuiCol_ScrollbarBg]        = ImVec4(0, 0, 0, 0);
-        c[ImGuiCol_ScrollbarGrab]      = HEX(0xCCD6E4);
-        c[ImGuiCol_ScrollbarGrabHovered] = HEX(0x9BA8B8);
-        c[ImGuiCol_ScrollbarGrabActive]  = HEX(0x6E7C8F);
+        c[ImGuiCol_ScrollbarGrab]        = gDark ? HEX(0x3A465D) : HEX(0xCCD6E4);
+        c[ImGuiCol_ScrollbarGrabHovered] = gDark ? HEX(0x4D5B73) : HEX(0x9BA8B8);
+        c[ImGuiCol_ScrollbarGrabActive]  = gDark ? HEX(0x6273A0) : HEX(0x6E7C8F);
 
         c[ImGuiCol_CheckMark]          = HEX(0x7C3AED);
         c[ImGuiCol_SliderGrab]         = HEX(0x7C3AED);
@@ -174,7 +214,7 @@ namespace ui {
         c[ImGuiCol_SeparatorHovered]   = ColBorderStrong;
         c[ImGuiCol_SeparatorActive]    = HEX(0x7C3AED);
 
-        c[ImGuiCol_ResizeGrip]         = HEX(0xD9E2EC);
+        c[ImGuiCol_ResizeGrip]         = gDark ? HEX(0x3A465D) : HEX(0xD9E2EC);
         c[ImGuiCol_ResizeGripHovered]  = HEX(0x7C3AED, 0.45f);
         c[ImGuiCol_ResizeGripActive]   = HEX(0x7C3AED, 0.80f);
 
@@ -191,7 +231,7 @@ namespace ui {
 
         c[ImGuiCol_TableHeaderBg]      = ColBgSubtle;
         c[ImGuiCol_TableBorderStrong]  = ColBorder;
-        c[ImGuiCol_TableBorderLight]   = HEX(0xEEF3F8);
+        c[ImGuiCol_TableBorderLight]   = gDark ? HEX(0x222B40) : HEX(0xEEF3F8);
         c[ImGuiCol_TableRowBg]         = ColBgCard;
         c[ImGuiCol_TableRowBgAlt]      = ColBgCardSoft;
 
@@ -207,13 +247,27 @@ namespace ui {
     }
 
     void applyDarkTheme() {
+        gDark = true;
+        setDarkPalette();
         applyTheme();
-        ImGuiStyle& s = ImGui::GetStyle();
-        s.FrameRounding = 10.0f;
     }
 
     void applyLightTheme() {
+        gDark = false;
+        setLightPalette();
         applyTheme();
+    }
+
+    bool isDarkTheme() {
+        return gDark;
+    }
+
+    ImU32 cardBgU32() {
+        return ImGui::ColorConvertFloat4ToU32(ColBgCard);
+    }
+
+    ImU32 cardBorderU32() {
+        return ImGui::ColorConvertFloat4ToU32(ColBorder);
     }
 
     UrgencyColor urgencyForDeadline(const data::Date& deadline,

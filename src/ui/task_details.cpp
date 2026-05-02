@@ -24,7 +24,7 @@ namespace ui {
             ImVec2 max = ImVec2(min.x + width, min.y + 68.0f);
             ImDrawList* dl = ImGui::GetWindowDrawList();
             dl->AddRectFilled(min, max, IM_COL32(249, 250, 252, 255), 16.0f);
-            dl->AddRect(min, max, IM_COL32(220, 229, 240, 255), 16.0f);
+            dl->AddRect(min, max, cardBorderU32(), 16.0f);
             ImGui::SetCursorScreenPos(ImVec2(min.x + 14.0f, min.y + 14.0f));
             ImGui::TextColored(ColTextFaint, "%s", label);
             ImGui::SetCursorScreenPos(ImVec2(min.x + 14.0f, min.y + 34.0f));
@@ -65,8 +65,8 @@ namespace ui {
         ImVec2 heroMin = ImGui::GetCursorScreenPos();
         ImVec2 heroMax = ImVec2(heroMin.x + ImGui::GetContentRegionAvail().x, heroMin.y + 168.0f);
         drawSoftShadow(dl, heroMin, heroMax, 20.0f);
-        dl->AddRectFilled(heroMin, heroMax, IM_COL32(255, 255, 255, 255), 20.0f);
-        dl->AddRect(heroMin, heroMax, IM_COL32(220, 229, 240, 255), 20.0f);
+        dl->AddRectFilled(heroMin, heroMax, cardBgU32(), 20.0f);
+        dl->AddRect(heroMin, heroMax, cardBorderU32(), 20.0f);
 
         float completion = logic::calculateWeightedCompletion(store, task->id);
         UrgencyColor pc = colorForPriority(task->priority);

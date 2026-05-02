@@ -14,20 +14,20 @@ namespace ui {
             a);
     }
 
-    inline const ImVec4 ColBgBase        = HEX(0xF6F8FC);
-    inline const ImVec4 ColBgSubtle      = HEX(0xEEF3F8);
-    inline const ImVec4 ColBgCard        = HEX(0xFFFFFF);
-    inline const ImVec4 ColBgCardSoft    = HEX(0xFBFCFE);
-    inline const ImVec4 ColBgActive      = HEX(0xEEE8FF);
-    inline const ImVec4 ColBgHover       = HEX(0xF7F4FF);
-    inline const ImVec4 ColBorder        = HEX(0xDCE5F0);
-    inline const ImVec4 ColBorderStrong  = HEX(0xC8D5E4);
-    inline const ImVec4 ColTextPrimary   = HEX(0x162033);
-    inline const ImVec4 ColTextSecondary = HEX(0x344256);
-    inline const ImVec4 ColTextMuted     = HEX(0x63748A);
-    inline const ImVec4 ColTextFaint     = HEX(0x95A2B4);
-    inline const ImVec4 ColShadow        = HEX(0x0F172A, 0.08f);
-    inline const ImVec4 ColShadowStrong  = HEX(0x0F172A, 0.14f);
+    inline ImVec4 ColBgBase        = HEX(0xF6F8FC);
+    inline ImVec4 ColBgSubtle      = HEX(0xEEF3F8);
+    inline ImVec4 ColBgCard        = HEX(0xFFFFFF);
+    inline ImVec4 ColBgCardSoft    = HEX(0xFBFCFE);
+    inline ImVec4 ColBgActive      = HEX(0xEEE8FF);
+    inline ImVec4 ColBgHover       = HEX(0xF7F4FF);
+    inline ImVec4 ColBorder        = HEX(0xDCE5F0);
+    inline ImVec4 ColBorderStrong  = HEX(0xC8D5E4);
+    inline ImVec4 ColTextPrimary   = HEX(0x162033);
+    inline ImVec4 ColTextSecondary = HEX(0x344256);
+    inline ImVec4 ColTextMuted     = HEX(0x63748A);
+    inline ImVec4 ColTextFaint     = HEX(0x95A2B4);
+    inline ImVec4 ColShadow        = HEX(0x0F172A, 0.08f);
+    inline ImVec4 ColShadowStrong  = HEX(0x0F172A, 0.14f);
 
     inline const ImU32 GradLeft  = IM_COL32(124,  58, 237, 255);
     inline const ImU32 GradMid   = IM_COL32(236,  72, 153, 255);
@@ -37,6 +37,9 @@ namespace ui {
     void applyTheme();
     void applyDarkTheme();
     void applyLightTheme();
+    bool isDarkTheme();
+    ImU32 cardBgU32();
+    ImU32 cardBorderU32();
 
     ImFont* fontUi();
     ImFont* fontUiSemibold();

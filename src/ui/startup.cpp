@@ -159,6 +159,11 @@ namespace ui {
             platform::imGuiNewFrame();
             ui::renderApp(store, uiState);
 
+            renderer.clearColor[0] = ui::ColBgBase.x;
+            renderer.clearColor[1] = ui::ColBgBase.y;
+            renderer.clearColor[2] = ui::ColBgBase.z;
+            renderer.clearColor[3] = ui::ColBgBase.w;
+
             platform::beginFrame(renderer);
             platform::imGuiRender();
             platform::presentFrame(renderer, true);

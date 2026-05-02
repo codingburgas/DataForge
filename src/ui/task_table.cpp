@@ -114,10 +114,10 @@ namespace ui {
             drawSoftShadow(dl, min, max, 18.0f,
                            selected ? IM_COL32(124, 58, 237, 28)
                                     : IM_COL32(15, 23, 42, 12));
-            dl->AddRectFilled(min, max, IM_COL32(255, 255, 255, 255), 18.0f);
+            dl->AddRectFilled(min, max, cardBgU32(), 18.0f);
             dl->AddRect(min, max,
                         selected ? IM_COL32(124, 58, 237, 255)
-                                 : IM_COL32(220, 229, 240, 255),
+                                 : cardBorderU32(),
                         18.0f, 0, selected ? 1.8f : 1.2f);
             dl->AddRectFilled(ImVec2(min.x + 18.0f, min.y + 20.0f),
                               ImVec2(min.x + 22.0f, max.y - 20.0f),

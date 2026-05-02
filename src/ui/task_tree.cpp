@@ -111,8 +111,8 @@ namespace ui {
                 ImDrawList* dl = ImGui::GetWindowDrawList();
                 ImVec2 min = ImGui::GetCursorScreenPos();
                 ImVec2 max = ImVec2(min.x + ImGui::GetContentRegionAvail().x, min.y + 64.0f);
-                dl->AddRectFilled(min, max, IM_COL32(249, 250, 252, 255), 16.0f);
-                dl->AddRect(min, max, IM_COL32(220, 229, 240, 255), 16.0f);
+                dl->AddRectFilled(min, max, ImGui::ColorConvertFloat4ToU32(ColBgSubtle), 16.0f);
+                dl->AddRect(min, max, cardBorderU32(), 16.0f);
                 ImGui::SetCursorScreenPos(ImVec2(min.x + 16.0f, min.y + 14.0f));
                 ImGui::PushFont(fontUiSemibold());
                 ImGui::TextColored(ColTextPrimary, "#%d %s", selected->id, selected->title.c_str());

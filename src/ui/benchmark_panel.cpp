@@ -25,8 +25,8 @@ namespace ui {
         ImVec2 cardMax = ImVec2(cardMin.x + benchControlsW, cardMin.y + 232.0f);
         ImDrawList* dl = ImGui::GetWindowDrawList();
         drawSoftShadow(dl, cardMin, cardMax, 20.0f);
-        dl->AddRectFilled(cardMin, cardMax, IM_COL32(255, 255, 255, 255), 20.0f);
-        dl->AddRect(cardMin, cardMax, IM_COL32(220, 229, 240, 255), 20.0f);
+        dl->AddRectFilled(cardMin, cardMax, cardBgU32(), 20.0f);
+        dl->AddRect(cardMin, cardMax, cardBorderU32(), 20.0f);
 
         ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 20.0f, cardMin.y + 22.0f));
         ImGui::PushFont(fontHeading());
@@ -108,8 +108,8 @@ namespace ui {
             double ratio = r.quickMs > 0.0 ? r.bubbleMs / r.quickMs : 0.0;
             ImVec2 noteMin = ImGui::GetCursorScreenPos();
             ImVec2 noteMax = ImVec2(noteMin.x + ImGui::GetContentRegionAvail().x, noteMin.y + 118.0f);
-            dl->AddRectFilled(noteMin, noteMax, IM_COL32(255, 255, 255, 255), 18.0f);
-            dl->AddRect(noteMin, noteMax, IM_COL32(220, 229, 240, 255), 18.0f);
+            dl->AddRectFilled(noteMin, noteMax, cardBgU32(), 18.0f);
+            dl->AddRect(noteMin, noteMax, cardBorderU32(), 18.0f);
             ImGui::SetCursorScreenPos(ImVec2(noteMin.x + 18.0f, noteMin.y + 18.0f));
             ImGui::PushFont(fontUiSemibold());
             ImGui::TextColored(ColTextPrimary, "Takeaway");

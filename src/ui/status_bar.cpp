@@ -33,14 +33,16 @@ namespace ui {
 
             dl->AddLine(ImVec2(wPos.x, wPos.y),
                         ImVec2(wPos.x + width, wPos.y),
-                        IM_COL32(220, 229, 240, 255));
+                        cardBorderU32());
 
             ImVec2 chipMin = ImVec2(wPos.x + 10.0f, wPos.y + 6.0f);
             ImVec2 chipMax = ImVec2(wPos.x + 92.0f, wPos.y + 28.0f);
-            ImU32 chipBg = store.dirty ? IM_COL32(255, 247, 237, 255)
-                                       : IM_COL32(236, 253, 245, 255);
-            ImU32 chipTx = store.dirty ? IM_COL32(180, 83, 9, 255)
-                                       : IM_COL32(6, 95, 70, 255);
+            ImU32 chipBg = isDarkTheme()
+                ? (store.dirty ? IM_COL32(63, 41, 14, 255) : IM_COL32(14, 50, 36, 255))
+                : (store.dirty ? IM_COL32(255, 247, 237, 255) : IM_COL32(236, 253, 245, 255));
+            ImU32 chipTx = isDarkTheme()
+                ? (store.dirty ? IM_COL32(252, 187, 102, 255) : IM_COL32(110, 220, 170, 255))
+                : (store.dirty ? IM_COL32(180, 83, 9, 255) : IM_COL32(6, 95, 70, 255));
             dl->AddRectFilled(chipMin, chipMax, chipBg, 11.0f);
             dl->AddCircleFilled(ImVec2(chipMin.x + 12.0f, chipMin.y + 11.0f), 3.5f, chipTx);
             ImGui::SetCursorScreenPos(ImVec2(chipMin.x + 22.0f, chipMin.y + 4.0f));

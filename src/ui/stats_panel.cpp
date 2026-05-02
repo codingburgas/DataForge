@@ -20,8 +20,8 @@ namespace ui {
             ImVec2 min = ImGui::GetWindowPos();
             ImVec2 max = ImVec2(min.x + width, min.y + 104.0f);
             drawSoftShadow(dl, min, max, 18.0f);
-            dl->AddRectFilled(min, max, IM_COL32(255, 255, 255, 255), 18.0f);
-            dl->AddRect(min, max, IM_COL32(220, 229, 240, 255), 18.0f);
+            dl->AddRectFilled(min, max, cardBgU32(), 18.0f);
+            dl->AddRect(min, max, cardBorderU32(), 18.0f);
             dl->AddRectFilled(ImVec2(min.x + 16.0f, min.y + 18.0f),
                               ImVec2(min.x + 56.0f, min.y + 58.0f),
                               IM_COL32((accent >> IM_COL32_R_SHIFT) & 255,
@@ -199,8 +199,8 @@ namespace ui {
                 ImVec2 min = ImGui::GetCursorScreenPos();
                 ImVec2 max = ImVec2(min.x + analyticsW, min.y + 84.0f);
                 ImDrawList* dl = ImGui::GetWindowDrawList();
-                dl->AddRectFilled(min, max, IM_COL32(255, 255, 255, 255), 18.0f);
-                dl->AddRect(min, max, IM_COL32(220, 229, 240, 255), 18.0f);
+                dl->AddRectFilled(min, max, cardBgU32(), 18.0f);
+                dl->AddRect(min, max, cardBorderU32(), 18.0f);
 
                 float completion = logic::calculateWeightedCompletion(store, root->id);
                 UrgencyColor pc = colorForPriority(root->priority);
@@ -243,8 +243,8 @@ namespace ui {
         ImVec2 cardMin = ImGui::GetCursorScreenPos();
         ImVec2 cardMax = ImVec2(cardMin.x + signalsW, cardMin.y + 156.0f);
         ImDrawList* dl = ImGui::GetWindowDrawList();
-        dl->AddRectFilled(cardMin, cardMax, IM_COL32(255, 255, 255, 255), 18.0f);
-        dl->AddRect(cardMin, cardMax, IM_COL32(220, 229, 240, 255), 18.0f);
+        dl->AddRectFilled(cardMin, cardMax, cardBgU32(), 18.0f);
+        dl->AddRect(cardMin, cardMax, cardBorderU32(), 18.0f);
         ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 16.0f, cardMin.y + 18.0f));
         ImGui::PushFont(fontUiSemibold());
         ImGui::TextColored(ColTextPrimary, "Overdue pressure");
@@ -261,8 +261,8 @@ namespace ui {
 
         cardMin = ImGui::GetCursorScreenPos();
         cardMax = ImVec2(cardMin.x + signalsW, cardMin.y + 156.0f);
-        dl->AddRectFilled(cardMin, cardMax, IM_COL32(255, 255, 255, 255), 18.0f);
-        dl->AddRect(cardMin, cardMax, IM_COL32(220, 229, 240, 255), 18.0f);
+        dl->AddRectFilled(cardMin, cardMax, cardBgU32(), 18.0f);
+        dl->AddRect(cardMin, cardMax, cardBorderU32(), 18.0f);
         ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 16.0f, cardMin.y + 18.0f));
         ImGui::PushFont(fontUiSemibold());
         ImGui::TextColored(ColTextPrimary, "Execution mix");

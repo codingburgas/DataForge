@@ -170,7 +170,7 @@ namespace ui {
 
             dl->AddLine(ImVec2(origin.x + sidebarW - 1.0f, origin.y),
                         ImVec2(origin.x + sidebarW - 1.0f, origin.y + sidebarH),
-                        IM_COL32(220, 229, 240, 255));
+                        cardBorderU32());
 
             ImVec2 logoMin = ImVec2(origin.x + 16.0f, origin.y + 16.0f);
             ImVec2 logoMax = ImVec2(origin.x + 52.0f, origin.y + 52.0f);
@@ -194,7 +194,7 @@ namespace ui {
 
             dl->AddLine(ImVec2(origin.x, origin.y + 68.0f),
                         ImVec2(origin.x + sidebarW, origin.y + 68.0f),
-                        IM_COL32(220, 229, 240, 255));
+                        cardBorderU32());
 
             struct NavDef { NavItem item; const char* label; };
             static const NavDef navItems[] = {
@@ -249,8 +249,8 @@ namespace ui {
                 ImVec2 cardMin = ImVec2(origin.x + 12.0f, origin.y + sidebarH - 114.0f);
                 ImVec2 cardMax = ImVec2(origin.x + sidebarW - 12.0f, origin.y + sidebarH - 56.0f);
                 drawSoftShadow(dl, cardMin, cardMax, 14.0f);
-                dl->AddRectFilled(cardMin, cardMax, IM_COL32(248, 250, 253, 255), 14.0f);
-                dl->AddRect(cardMin, cardMax, IM_COL32(220, 229, 240, 255), 14.0f);
+                dl->AddRectFilled(cardMin, cardMax, ImGui::ColorConvertFloat4ToU32(ColBgSubtle), 14.0f);
+                dl->AddRect(cardMin, cardMax, cardBorderU32(), 14.0f);
                 ImGui::PushTextWrapPos(cardMax.x - 14.0f);
                 ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 14.0f, cardMin.y + 12.0f));
                 ImGui::PushFont(fontUiSemibold());
@@ -326,8 +326,8 @@ namespace ui {
 
             ImVec2 chipMin = ImVec2(pos.x + width - 408.0f, pos.y + 20.0f);
             ImVec2 chipMax = ImVec2(pos.x + width - 252.0f, pos.y + 52.0f);
-            dl->AddRectFilled(chipMin, chipMax, IM_COL32(247, 249, 252, 255), 16.0f);
-            dl->AddRect(chipMin, chipMax, IM_COL32(220, 229, 240, 255), 16.0f);
+            dl->AddRectFilled(chipMin, chipMax, ImGui::ColorConvertFloat4ToU32(ColBgSubtle), 16.0f);
+            dl->AddRect(chipMin, chipMax, cardBorderU32(), 16.0f);
             dl->AddCircle(ImVec2(chipMin.x + 18.0f, chipMin.y + 16.0f), 5.0f, IM_COL32(149, 162, 180, 255), 0, 1.3f);
             dl->AddLine(ImVec2(chipMin.x + 18.0f, chipMin.y + 16.0f),
                         ImVec2(chipMin.x + 18.0f, chipMin.y + 13.0f),
@@ -340,8 +340,12 @@ namespace ui {
 
             ImVec2 saveMin = ImVec2(pos.x + width - 244.0f, pos.y + 20.0f);
             ImVec2 saveMax = ImVec2(pos.x + width - 168.0f, pos.y + 52.0f);
-            ImU32 saveBg = store.dirty ? IM_COL32(255, 247, 237, 255) : IM_COL32(236, 253, 245, 255);
-            ImU32 saveTx = store.dirty ? IM_COL32(180, 83, 9, 255) : IM_COL32(6, 95, 70, 255);
+            ImU32 saveBg = isDarkTheme()
+                ? (store.dirty ? IM_COL32(63, 41, 14, 255) : IM_COL32(14, 50, 36, 255))
+                : (store.dirty ? IM_COL32(255, 247, 237, 255) : IM_COL32(236, 253, 245, 255));
+            ImU32 saveTx = isDarkTheme()
+                ? (store.dirty ? IM_COL32(252, 187, 102, 255) : IM_COL32(110, 220, 170, 255))
+                : (store.dirty ? IM_COL32(180, 83, 9, 255) : IM_COL32(6, 95, 70, 255));
             dl->AddRectFilled(saveMin, saveMax, saveBg, 16.0f);
             ImGui::SetCursorScreenPos(ImVec2(saveMin.x + 14.0f, saveMin.y + 7.0f));
             ImGui::PushFont(fontUiSemibold());
@@ -356,7 +360,7 @@ namespace ui {
 
             dl->AddLine(ImVec2(pos.x, pos.y + TOPBAR_H - 1.0f),
                         ImVec2(pos.x + width, pos.y + TOPBAR_H - 1.0f),
-                        IM_COL32(220, 229, 240, 255));
+                        cardBorderU32());
 
             ImGui::End();
             ImGui::PopStyleVar();
@@ -374,8 +378,8 @@ namespace ui {
             ImVec2 min = ImGui::GetWindowPos();
             ImVec2 max = ImVec2(min.x + width, min.y + 104.0f);
             drawSoftShadow(dl, min, max, 18.0f);
-            dl->AddRectFilled(min, max, IM_COL32(255, 255, 255, 255), 18.0f);
-            dl->AddRect(min, max, IM_COL32(220, 229, 240, 255), 18.0f);
+            dl->AddRectFilled(min, max, cardBgU32(), 18.0f);
+            dl->AddRect(min, max, cardBorderU32(), 18.0f);
             dl->AddRectFilled(ImVec2(min.x + 18.0f, min.y + 18.0f),
                               ImVec2(min.x + 58.0f, min.y + 58.0f),
                               IM_COL32((accent >> IM_COL32_R_SHIFT) & 255,
@@ -411,10 +415,10 @@ namespace ui {
             ImU32 accent = IM_COL32((int)(pc.r * 255), (int)(pc.g * 255), (int)(pc.b * 255), 255);
 
             drawSoftShadow(dl, min, max, 18.0f);
-            dl->AddRectFilled(min, max, IM_COL32(255, 255, 255, 255), 18.0f);
+            dl->AddRectFilled(min, max, cardBgU32(), 18.0f);
             dl->AddRect(min, max,
                         uiState.selectedTaskId == task.id ? IM_COL32(124, 58, 237, 255)
-                                                          : IM_COL32(220, 229, 240, 255),
+                                                          : cardBorderU32(),
                         18.0f, 0, 1.3f);
             dl->AddRectFilled(ImVec2(min.x + 18.0f, min.y + 18.0f),
                               ImVec2(min.x + 22.0f, max.y - 18.0f), accent, 99.0f);
@@ -555,8 +559,8 @@ namespace ui {
                     ImVec2 min = ImGui::GetCursorScreenPos();
                     ImVec2 max = ImVec2(min.x + sideContentW, min.y + 72.0f);
                     drawSoftShadow(ImGui::GetWindowDrawList(), min, max, 18.0f);
-                    ImGui::GetWindowDrawList()->AddRectFilled(min, max, IM_COL32(255, 255, 255, 255), 18.0f);
-                    ImGui::GetWindowDrawList()->AddRect(min, max, IM_COL32(220, 229, 240, 255), 18.0f);
+                    ImGui::GetWindowDrawList()->AddRectFilled(min, max, cardBgU32(), 18.0f);
+                    ImGui::GetWindowDrawList()->AddRect(min, max, cardBorderU32(), 18.0f);
 
                     UrgencyColor pc = colorForPriority(root->priority);
                     ImU32 accent = IM_COL32((int)(pc.r * 255), (int)(pc.g * 255), (int)(pc.b * 255), 255);
