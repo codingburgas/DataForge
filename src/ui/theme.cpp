@@ -53,31 +53,36 @@ namespace ui {
         ImGuiIO& io = ImGui::GetIO();
 
         gFontUi = tryLoadFont(15.5f, {
-            "../vendor/imgui/misc/fonts/Karla-Regular.ttf",
             "vendor/imgui/misc/fonts/Karla-Regular.ttf",
+            "../vendor/imgui/misc/fonts/Karla-Regular.ttf",
+            "src/vendor/imgui/misc/fonts/Karla-Regular.ttf",
             "C:/Windows/Fonts/segoeui.ttf"
         });
         gFontUiSemibold = tryLoadFont(15.5f, {
-            "../vendor/imgui/misc/fonts/Roboto-Medium.ttf",
             "vendor/imgui/misc/fonts/Roboto-Medium.ttf",
+            "../vendor/imgui/misc/fonts/Roboto-Medium.ttf",
+            "src/vendor/imgui/misc/fonts/Roboto-Medium.ttf",
             "C:/Windows/Fonts/seguisb.ttf",
             "C:/Windows/Fonts/calibrib.ttf"
         });
         gFontHeading = tryLoadFont(21.0f, {
-            "../vendor/imgui/misc/fonts/Roboto-Medium.ttf",
             "vendor/imgui/misc/fonts/Roboto-Medium.ttf",
+            "../vendor/imgui/misc/fonts/Roboto-Medium.ttf",
+            "src/vendor/imgui/misc/fonts/Roboto-Medium.ttf",
             "C:/Windows/Fonts/seguisb.ttf",
             "C:/Windows/Fonts/calibrib.ttf"
         });
         gFontDisplay = tryLoadFont(29.0f, {
-            "../vendor/imgui/misc/fonts/Roboto-Medium.ttf",
             "vendor/imgui/misc/fonts/Roboto-Medium.ttf",
+            "../vendor/imgui/misc/fonts/Roboto-Medium.ttf",
+            "src/vendor/imgui/misc/fonts/Roboto-Medium.ttf",
             "C:/Windows/Fonts/seguisb.ttf",
             "C:/Windows/Fonts/calibrib.ttf"
         });
         gFontMono = tryLoadFont(14.0f, {
-            "../vendor/imgui/misc/fonts/Cousine-Regular.ttf",
             "vendor/imgui/misc/fonts/Cousine-Regular.ttf",
+            "../vendor/imgui/misc/fonts/Cousine-Regular.ttf",
+            "src/vendor/imgui/misc/fonts/Cousine-Regular.ttf",
             "C:/Windows/Fonts/consola.ttf"
         });
 

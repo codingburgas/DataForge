@@ -46,12 +46,12 @@
     <ClCompile Include="ui\shortcuts.cpp">      <Filter>ui</Filter>      </ClCompile>
     <ClCompile Include="platform\window.cpp">   <Filter>platform</Filter> </ClCompile>
     <ClCompile Include="platform\renderer.cpp"> <Filter>platform</Filter> </ClCompile>
-    <ClCompile Include="..\vendor\imgui\imgui.cpp">         <Filter>vendor\imgui</Filter> </ClCompile>
-    <ClCompile Include="..\vendor\imgui\imgui_draw.cpp">    <Filter>vendor\imgui</Filter> </ClCompile>
-    <ClCompile Include="..\vendor\imgui\imgui_tables.cpp">  <Filter>vendor\imgui</Filter> </ClCompile>
-    <ClCompile Include="..\vendor\imgui\imgui_widgets.cpp"> <Filter>vendor\imgui</Filter> </ClCompile>
-    <ClCompile Include="..\vendor\imgui\backends\imgui_impl_win32.cpp"> <Filter>vendor\imgui</Filter> </ClCompile>
-    <ClCompile Include="..\vendor\imgui\backends\imgui_impl_dx11.cpp">  <Filter>vendor\imgui</Filter> </ClCompile>
+    <ClCompile Include="vendor\imgui\imgui.cpp">         <Filter>vendor\imgui</Filter> </ClCompile>
+    <ClCompile Include="vendor\imgui\imgui_draw.cpp">    <Filter>vendor\imgui</Filter> </ClCompile>
+    <ClCompile Include="vendor\imgui\imgui_tables.cpp">  <Filter>vendor\imgui</Filter> </ClCompile>
+    <ClCompile Include="vendor\imgui\imgui_widgets.cpp"> <Filter>vendor\imgui</Filter> </ClCompile>
+    <ClCompile Include="vendor\imgui\backends\imgui_impl_win32.cpp"> <Filter>vendor\imgui</Filter> </ClCompile>
+    <ClCompile Include="vendor\imgui\backends\imgui_impl_dx11.cpp">  <Filter>vendor\imgui</Filter> </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headerStaticLibrary\include\data\types.h">       <Filter>data</Filter>  </ClInclude>
