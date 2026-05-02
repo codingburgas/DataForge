@@ -5,6 +5,7 @@
 #include "logic/tasks.h"
 #include "logic/recursion.h"
 #include "logic/dates.h"
+#include "data/store.h"
 #include "imgui.h"
 
 namespace ui {
@@ -29,8 +30,8 @@ namespace ui {
         void renderParentPicker(const data::TaskStore& store, UiState& uiState) {
             std::vector<int> candidates;
             candidates.push_back(-1);
-            for (std::size_t i = 0; i < store.tasks.size(); ++i) {
-                int id = store.tasks[i].id;
+            for (const data::Task& t : store.tasks) {
+                int id = t.id;
                 if (uiState.editingTaskId > 0 && id == uiState.editingTaskId) {
                     continue;
                 }
@@ -40,24 +41,19 @@ namespace ui {
             std::string preview = "(root)";
             if (uiState.edit.parentId != -1) {
                 preview = "(invalid)";
-                for (std::size_t i = 0; i < store.tasks.size(); ++i) {
-                    if (store.tasks[i].id == uiState.edit.parentId) {
-                        preview = "#" + std::to_string(store.tasks[i].id) + " " + store.tasks[i].title;
-                        break;
-                    }
+                if (const data::Task* p =
+                        data::findTaskInStoreConst(store, uiState.edit.parentId)) {
+                    preview = "#" + std::to_string(p->id) + " " + p->title;
                 }
             }
 
             if (ImGui::BeginCombo("##Parent", preview.c_str())) {
-                for (std::size_t i = 0; i < candidates.size(); ++i) {
-                    int cid = candidates[i];
+                for (int cid : candidates) {
                     std::string label = "(root)";
                     if (cid != -1) {
-                        for (std::size_t j = 0; j < store.tasks.size(); ++j) {
-                            if (store.tasks[j].id == cid) {
-                                label = "#" + std::to_string(cid) + " " + store.tasks[j].title;
-                                break;
-                            }
+                        if (const data::Task* t =
+                                data::findTaskInStoreConst(store, cid)) {
+                            label = "#" + std::to_string(cid) + " " + t->title;
                         }
                     }
                     bool selected = uiState.edit.parentId == cid;
@@ -233,11 +229,9 @@ namespace ui {
                            ImVec2(116.0f, 38.0f), 14.0f)) {
             data::Task task{};
             if (uiState.editingTaskId > 0) {
-                for (std::size_t i = 0; i < store.tasks.size(); ++i) {
-                    if (store.tasks[i].id == uiState.editingTaskId) {
-                        task = store.tasks[i];
-                        break;
-                    }
+                if (const data::Task* existing =
+                        data::findTaskInStoreConst(store, uiState.editingTaskId)) {
+                    task = *existing;
                 }
             } else {
                 task.id = 0;
@@ -292,13 +286,7 @@ namespace ui {
         }
 
         int id = uiState.pendingDeleteId;
-        const data::Task* task = nullptr;
-        for (std::size_t i = 0; i < store.tasks.size(); ++i) {
-            if (store.tasks[i].id == id) {
-                task = &store.tasks[i];
-                break;
-            }
-        }
+        const data::Task* task = data::findTaskInStoreConst(store, id);
 
         ImGui::Dummy(ImVec2(1.0f, 18.0f));
         ImGui::SetCursorPosX(24.0f);

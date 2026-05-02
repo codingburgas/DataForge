@@ -4,20 +4,12 @@
 #include "logic/recursion.h"
 #include "logic/tasks.h"
 #include "logic/dates.h"
+#include "data/store.h"
 #include "imgui.h"
 
 namespace ui {
 
     namespace {
-
-        const data::Task* findTask(const data::TaskStore& store, int taskId) {
-            for (std::size_t i = 0; i < store.tasks.size(); ++i) {
-                if (store.tasks[i].id == taskId) {
-                    return &store.tasks[i];
-                }
-            }
-            return nullptr;
-        }
 
         void renderMetricTile(const char* label, const char* value, float width) {
             ImVec2 min = ImGui::GetCursorScreenPos();
@@ -51,7 +43,7 @@ namespace ui {
             return;
         }
 
-        const data::Task* task = findTask(store, uiState.selectedTaskId);
+        const data::Task* task = data::findTaskInStoreConst(store, uiState.selectedTaskId);
         if (task == nullptr) {
             uiState.selectedTaskId = -1;
             ImGui::TextColored(ColTextFaint, "Task no longer exists.");
@@ -70,7 +62,7 @@ namespace ui {
 
         float completion = logic::calculateWeightedCompletion(store, task->id);
         UrgencyColor pc = colorForPriority(task->priority);
-        ImU32 ring = IM_COL32((int)(pc.r * 255), (int)(pc.g * 255), (int)(pc.b * 255), 255);
+        ImU32 ring = urgencyToImU32(pc);
         renderProgressRing(ImVec2(heroMin.x + 46.0f, heroMin.y + 54.0f), 28.0f, 5.0f,
                            completion * 100.0f, ring);
         char pct[16];

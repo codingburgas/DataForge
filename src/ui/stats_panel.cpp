@@ -3,6 +3,7 @@
 #include "logic/recursion.h"
 #include "logic/tasks.h"
 #include "logic/dates.h"
+#include "data/store.h"
 #include "imgui.h"
 
 namespace ui {
@@ -69,15 +70,6 @@ namespace ui {
             ImGui::Dummy(ImVec2(width, height));
         }
 
-        const data::Task* findTask(const data::TaskStore& store, int taskId) {
-            for (std::size_t i = 0; i < store.tasks.size(); ++i) {
-                if (store.tasks[i].id == taskId) {
-                    return &store.tasks[i];
-                }
-            }
-            return nullptr;
-        }
-
     }
 
     void renderStatsPanel(const data::TaskStore& store, UiState&) {
@@ -86,8 +78,7 @@ namespace ui {
         int totalTasks = static_cast<int>(store.tasks.size());
         long long totalMins = 0;
 
-        for (std::size_t i = 0; i < store.tasks.size(); ++i) {
-            const data::Task& t = store.tasks[i];
+        for (const data::Task& t : store.tasks) {
             int p = static_cast<int>(t.priority);
             int s = static_cast<int>(t.status);
             if (p >= 0 && p < 4) byPriority[p] += 1.0f;
@@ -154,7 +145,7 @@ namespace ui {
             IM_COL32(234, 88, 12, 255),
             IM_COL32(220, 38, 38, 255),
         };
-        renderDistributionBar(byPriority, priCols, 4, (float)totalTasks, analyticsW, 12.0f);
+        renderDistributionBar(byPriority, priCols, 4, static_cast<float>(totalTasks), analyticsW, 12.0f);
         ImGui::Dummy(ImVec2(1.0f, 8.0f));
         for (int i = 0; i < 4; ++i) {
             ImGui::TextColored(ImGui::ColorConvertU32ToFloat4(priCols[i]),
@@ -173,7 +164,7 @@ namespace ui {
             IM_COL32(  5, 150, 105, 255),
             IM_COL32(220,  38,  38, 255),
         };
-        renderDistributionBar(byStatus, stCols, 4, (float)totalTasks, analyticsW, 12.0f);
+        renderDistributionBar(byStatus, stCols, 4, static_cast<float>(totalTasks), analyticsW, 12.0f);
         ImGui::Dummy(ImVec2(1.0f, 8.0f));
         for (int i = 0; i < 4; ++i) {
             ImGui::TextColored(ImGui::ColorConvertU32ToFloat4(stCols[i]),
@@ -190,8 +181,8 @@ namespace ui {
         if (roots.empty()) {
             ImGui::TextColored(ColTextFaint, "No root projects yet.");
         } else {
-            for (std::size_t i = 0; i < roots.size(); ++i) {
-                const data::Task* root = findTask(store, roots[i]);
+            for (int rootId : roots) {
+                const data::Task* root = data::findTaskInStoreConst(store, rootId);
                 if (root == nullptr) {
                     continue;
                 }
@@ -204,7 +195,7 @@ namespace ui {
 
                 float completion = logic::calculateWeightedCompletion(store, root->id);
                 UrgencyColor pc = colorForPriority(root->priority);
-                ImU32 accent = IM_COL32((int)(pc.r * 255), (int)(pc.g * 255), (int)(pc.b * 255), 255);
+                ImU32 accent = urgencyToImU32(pc);
                 renderProgressRing(ImVec2(min.x + 32.0f, min.y + 42.0f), 16.0f, 4.0f,
                                    completion * 100.0f, accent);
 

@@ -2,20 +2,12 @@
 #include "ui/theme.h"
 #include "logic/tasks.h"
 #include "logic/recursion.h"
+#include "data/store.h"
 #include "imgui.h"
 
 namespace ui {
 
     namespace {
-
-        const data::Task* findTask(const data::TaskStore& store, int taskId) {
-            for (std::size_t i = 0; i < store.tasks.size(); ++i) {
-                if (store.tasks[i].id == taskId) {
-                    return &store.tasks[i];
-                }
-            }
-            return nullptr;
-        }
 
         void renderTreeNode(data::TaskStore& store,
                             UiState& uiState,
@@ -26,7 +18,7 @@ namespace ui {
                 return;
             }
 
-            const data::Task* task = findTask(store, taskId);
+            const data::Task* task = data::findTaskInStoreConst(store, taskId);
             if (task == nullptr) {
                 return;
             }
@@ -59,8 +51,7 @@ namespace ui {
             ImVec2 itemMin = ImGui::GetItemRectMin();
             ImVec2 itemMax = ImGui::GetItemRectMax();
             UrgencyColor pc = colorForPriority(task->priority);
-            ImU32 accent = IM_COL32((int)(pc.r * 255), (int)(pc.g * 255),
-                                    (int)(pc.b * 255), 255);
+            ImU32 accent = urgencyToImU32(pc);
             float dotX = itemMin.x + ImGui::GetTreeNodeToLabelSpacing() - 10.0f;
             float dotY = (itemMin.y + itemMax.y) * 0.5f;
             dl->AddCircleFilled(ImVec2(dotX, dotY), 3.5f, accent);
@@ -76,8 +67,8 @@ namespace ui {
             }
 
             if (opened && !children.empty()) {
-                for (std::size_t i = 0; i < children.size(); ++i) {
-                    renderTreeNode(store, uiState, children[i], depth + 1);
+                for (int childId : children) {
+                    renderTreeNode(store, uiState, childId, depth + 1);
                 }
                 ImGui::TreePop();
             }
@@ -106,7 +97,7 @@ namespace ui {
         }
 
         if (uiState.selectedTaskId > 0) {
-            const data::Task* selected = findTask(store, uiState.selectedTaskId);
+            const data::Task* selected = data::findTaskInStoreConst(store, uiState.selectedTaskId);
             if (selected != nullptr) {
                 ImDrawList* dl = ImGui::GetWindowDrawList();
                 ImVec2 min = ImGui::GetCursorScreenPos();
@@ -127,8 +118,8 @@ namespace ui {
 
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 4.0f));
         ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 18.0f);
-        for (std::size_t i = 0; i < roots.size(); ++i) {
-            renderTreeNode(store, uiState, roots[i], 0);
+        for (int rootId : roots) {
+            renderTreeNode(store, uiState, rootId, 0);
         }
         ImGui::PopStyleVar(2);
     }

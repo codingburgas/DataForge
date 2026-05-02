@@ -86,8 +86,7 @@ namespace ui {
                 { "Quick",  r.quickMs,  IM_COL32(5, 150, 105, 255) }
             };
 
-            for (int i = 0; i < 2; ++i) {
-                const RowDef& row = rows[i];
+            for (const RowDef& row : rows) {
                 ImGui::PushFont(fontUiSemibold());
                 ImGui::TextColored(ColTextPrimary, "%s", row.label);
                 ImGui::PopFont();

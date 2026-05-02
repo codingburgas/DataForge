@@ -15,6 +15,7 @@
 #include "logic/recursion.h"
 #include "logic/dates.h"
 #include "logic/sort.h"
+#include "data/store.h"
 #include "imgui.h"
 
 namespace ui {
@@ -26,20 +27,11 @@ namespace ui {
         static const float SIDEBAR_W_FULL  = 244.0f;
         static const float SIDEBAR_W_SLIM  = 76.0f;
 
-        const data::Task* findTask(const data::TaskStore& store, int taskId) {
-            for (std::size_t i = 0; i < store.tasks.size(); ++i) {
-                if (store.tasks[i].id == taskId) {
-                    return &store.tasks[i];
-                }
-            }
-            return nullptr;
-        }
-
         std::vector<data::Task> collectFocusTasks(const data::TaskStore& store, std::size_t limit) {
             std::vector<data::Task> out;
-            for (std::size_t i = 0; i < store.tasks.size(); ++i) {
-                if (store.tasks[i].status != data::STATUS_DONE) {
-                    out.push_back(store.tasks[i]);
+            for (const data::Task& t : store.tasks) {
+                if (t.status != data::STATUS_DONE) {
+                    out.push_back(t);
                 }
             }
             logic::sortTasks(out, logic::SORT_KEY_PRIORITY, logic::SORT_ALGO_QUICK);
@@ -52,8 +44,8 @@ namespace ui {
         std::vector<const data::Task*> collectRecentTasks(const data::TaskStore& store, std::size_t limit) {
             std::vector<const data::Task*> out;
             out.reserve(store.tasks.size());
-            for (std::size_t i = 0; i < store.tasks.size(); ++i) {
-                out.push_back(&store.tasks[i]);
+            for (const data::Task& t : store.tasks) {
+                out.push_back(&t);
             }
             std::sort(out.begin(), out.end(),
                 [](const data::Task* a, const data::Task* b) {
@@ -423,7 +415,7 @@ namespace ui {
             ImVec2 min = ImGui::GetCursorScreenPos();
             ImVec2 max = ImVec2(min.x + width, min.y + 116.0f);
             UrgencyColor pc = colorForPriority(task.priority);
-            ImU32 accent = IM_COL32((int)(pc.r * 255), (int)(pc.g * 255), (int)(pc.b * 255), 255);
+            ImU32 accent = urgencyToImU32(pc);
 
             drawSoftShadow(dl, min, max, 18.0f);
             dl->AddRectFilled(min, max, cardBgU32(), 18.0f);
@@ -480,12 +472,12 @@ namespace ui {
             int completed = 0;
             int blocked = 0;
             int inProgress = 0;
-            for (std::size_t i = 0; i < store.tasks.size(); ++i) {
-                if (store.tasks[i].status == data::STATUS_DONE) {
+            for (const data::Task& t : store.tasks) {
+                if (t.status == data::STATUS_DONE) {
                     ++completed;
-                } else if (store.tasks[i].status == data::STATUS_BLOCKED) {
+                } else if (t.status == data::STATUS_BLOCKED) {
                     ++blocked;
-                } else if (store.tasks[i].status == data::STATUS_IN_PROGRESS) {
+                } else if (t.status == data::STATUS_IN_PROGRESS) {
                     ++inProgress;
                 }
             }
@@ -539,8 +531,8 @@ namespace ui {
             if (focus.empty()) {
                 ImGui::TextColored(ColTextFaint, "No active tasks yet. Create one to start the board.");
             } else {
-                for (std::size_t i = 0; i < focus.size(); ++i) {
-                    renderOverviewTaskCard(focus[i], uiState, contentW);
+                for (const data::Task& t : focus) {
+                    renderOverviewTaskCard(t, uiState, contentW);
                 }
             }
 
@@ -562,7 +554,7 @@ namespace ui {
                 ImGui::TextColored(ColTextFaint, "No root projects yet.");
             } else {
                 for (std::size_t i = 0; i < roots.size() && i < 4; ++i) {
-                    const data::Task* root = findTask(store, roots[i]);
+                    const data::Task* root = data::findTaskInStoreConst(store, roots[i]);
                     if (root == nullptr) {
                         continue;
                     }
@@ -574,7 +566,7 @@ namespace ui {
                     ImGui::GetWindowDrawList()->AddRect(min, max, cardBorderU32(), 18.0f);
 
                     UrgencyColor pc = colorForPriority(root->priority);
-                    ImU32 accent = IM_COL32((int)(pc.r * 255), (int)(pc.g * 255), (int)(pc.b * 255), 255);
+                    ImU32 accent = urgencyToImU32(pc);
                     ImGui::GetWindowDrawList()->AddCircleFilled(ImVec2(min.x + 18.0f, min.y + 24.0f), 4.0f, accent);
                     ImGui::PushTextWrapPos(max.x - 44.0f);
                     ImGui::SetCursorScreenPos(ImVec2(min.x + 32.0f, min.y + 15.0f));
@@ -611,8 +603,8 @@ namespace ui {
             if (recent.empty()) {
                 ImGui::TextColored(ColTextFaint, "Nothing recent yet.");
             } else {
-                for (std::size_t i = 0; i < recent.size(); ++i) {
-                    const data::Task& task = *recent[i];
+                for (const data::Task* recentPtr : recent) {
+                    const data::Task& task = *recentPtr;
                     ImVec2 min = ImGui::GetCursorScreenPos();
                     ImVec2 max = ImVec2(min.x + sideContentW, min.y + 64.0f);
                     ImGui::GetWindowDrawList()->AddLine(ImVec2(min.x, max.y),

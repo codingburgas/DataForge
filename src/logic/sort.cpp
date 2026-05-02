@@ -23,9 +23,7 @@ namespace logic {
             std::size_t lastIdx = n - 1 - pass;
             for (std::size_t i = 0; i < lastIdx; ++i) {
                 if (sortsBefore(v[i + 1], v[i], key)) {
-                    data::Task tmp = v[i];
-                    v[i]     = v[i + 1];
-                    v[i + 1] = tmp;
+                    std::swap(v[i], v[i + 1]);
                     swapped = true;
                 }
             }
@@ -43,14 +41,10 @@ namespace logic {
         for (int j = lo; j < hi; ++j) {
             if (!sortsBefore(pivot, v[j], key)) {
                 i += 1;
-                data::Task tmp = v[i];
-                v[i] = v[j];
-                v[j] = tmp;
+                std::swap(v[i], v[j]);
             }
         }
-        data::Task tmp = v[i + 1];
-        v[i + 1] = v[hi];
-        v[hi]    = tmp;
+        std::swap(v[i + 1], v[hi]);
         return i + 1;
     }
 

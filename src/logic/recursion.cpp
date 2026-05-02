@@ -17,8 +17,8 @@ namespace logic {
         }
         int total = t->estimatedMinutes;
         std::vector<int> children = childTaskIds(store, id);
-        for (std::size_t i = 0; i < children.size(); ++i) {
-            total += calcTotalMinutesInner(store, children[i], depth + 1);
+        for (int childId : children) {
+            total += calcTotalMinutesInner(store, childId, depth + 1);
         }
         return total;
     }
@@ -49,14 +49,14 @@ namespace logic {
         }
         long long totalWeight = ownWeight;
         double    weightedSum = static_cast<double>(ownCompletion) * ownWeight;
-        for (std::size_t i = 0; i < children.size(); ++i) {
+        for (int childId : children) {
             const data::Task* c =
-                data::findTaskInStoreConst(store, children[i]);
+                data::findTaskInStoreConst(store, childId);
             if (c == nullptr) {
                 continue;
             }
             int   w = effectiveMinutes(*c);
-            float r = calcWeightedInner(store, children[i], depth + 1);
+            float r = calcWeightedInner(store, childId, depth + 1);
             totalWeight += w;
             weightedSum += static_cast<double>(r) * w;
         }
@@ -78,8 +78,8 @@ namespace logic {
         }
         std::vector<int> children = childTaskIds(store, id);
         int count = 0;
-        for (std::size_t i = 0; i < children.size(); ++i) {
-            count += 1 + countDescInner(store, children[i], depth + 1);
+        for (int childId : children) {
+            count += 1 + countDescInner(store, childId, depth + 1);
         }
         return count;
     }
@@ -97,8 +97,8 @@ namespace logic {
             return 0;
         }
         int best = 0;
-        for (std::size_t i = 0; i < children.size(); ++i) {
-            int d = 1 + depthInner(store, children[i], depth + 1);
+        for (int childId : children) {
+            int d = 1 + depthInner(store, childId, depth + 1);
             if (d > best) {
                 best = d;
             }
@@ -118,9 +118,9 @@ namespace logic {
             return;
         }
         std::vector<int> children = childTaskIds(store, id);
-        for (std::size_t i = 0; i < children.size(); ++i) {
-            out.push_back(children[i]);
-            collectInner(store, children[i], depth + 1, out);
+        for (int childId : children) {
+            out.push_back(childId);
+            collectInner(store, childId, depth + 1, out);
         }
     }
 
@@ -133,8 +133,7 @@ namespace logic {
     int countOverdueTasks(const data::TaskStore& store,
                           const data::Date& today) {
         int count = 0;
-        for (std::size_t i = 0; i < store.tasks.size(); ++i) {
-            const data::Task& t = store.tasks[i];
+        for (const data::Task& t : store.tasks) {
             if (data::isDateZero(t.deadline)) {
                 continue;
             }

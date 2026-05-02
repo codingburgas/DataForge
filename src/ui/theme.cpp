@@ -17,8 +17,7 @@ namespace ui {
 
         ImFont* tryLoadFont(float size, const std::vector<const char*>& candidates) {
             ImGuiIO& io = ImGui::GetIO();
-            for (std::size_t i = 0; i < candidates.size(); ++i) {
-                const char* path = candidates[i];
+            for (const char* path : candidates) {
                 if (std::filesystem::exists(path)) {
                     if (ImFont* font = io.Fonts->AddFontFromFileTTF(path, size)) {
                         return font;

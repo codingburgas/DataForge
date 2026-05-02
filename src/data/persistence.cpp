@@ -35,8 +35,7 @@ namespace data {
     static std::string escapeValue(const std::string& s) {
         std::string out;
         out.reserve(s.size());
-        for (std::size_t i = 0; i < s.size(); ++i) {
-            char c = s[i];
+        for (char c : s) {
             if (c == '\\') {
                 out += "\\\\";
             } else if (c == '\n') {
@@ -70,8 +69,7 @@ namespace data {
         ss << FILE_MAGIC << "\n";
         ss << "nextId=" << store.nextId << "\n";
         ss << RECORD_SEP << "\n";
-        for (std::size_t i = 0; i < store.tasks.size(); ++i) {
-            const Task& t = store.tasks[i];
+        for (const Task& t : store.tasks) {
             ss << "id="                << t.id               << "\n";
             ss << "parent="            << t.parentId         << "\n";
             ss << "title="             << escapeValue(t.title)        << "\n";
@@ -206,9 +204,9 @@ namespace data {
 
         if (tmp.nextId < 1) {
             int maxId = 0;
-            for (std::size_t i = 0; i < tmp.tasks.size(); ++i) {
-                if (tmp.tasks[i].id > maxId) {
-                    maxId = tmp.tasks[i].id;
+            for (const Task& t : tmp.tasks) {
+                if (t.id > maxId) {
+                    maxId = t.id;
                 }
             }
             tmp.nextId = maxId + 1;

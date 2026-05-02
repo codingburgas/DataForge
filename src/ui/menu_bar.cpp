@@ -3,6 +3,7 @@
 #include "ui/theme.h"
 #include "ui/toast.h"
 #include "logic/tasks.h"
+#include "data/store.h"
 #include "imgui.h"
 
 namespace ui {
@@ -37,11 +38,9 @@ namespace ui {
             }
             bool canEdit = uiState.selectedTaskId > 0;
             if (ImGui::MenuItem("Edit Selected...", nullptr, false, canEdit)) {
-                for (std::size_t i = 0; i < store.tasks.size(); ++i) {
-                    if (store.tasks[i].id == uiState.selectedTaskId) {
-                        openEditDialog(uiState, store.tasks[i]);
-                        break;
-                    }
+                if (const data::Task* sel =
+                        data::findTaskInStoreConst(store, uiState.selectedTaskId)) {
+                    openEditDialog(uiState, *sel);
                 }
             }
             if (ImGui::MenuItem("Delete Selected", "Del", false, canEdit)) {

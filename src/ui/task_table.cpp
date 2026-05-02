@@ -6,6 +6,7 @@
 #include "logic/tasks.h"
 #include "logic/recursion.h"
 #include "logic/dates.h"
+#include "data/store.h"
 #include "imgui.h"
 
 namespace ui {
@@ -20,15 +21,6 @@ namespace ui {
         };
         static const char* SORT_KEY_ITEMS[]  = { "Priority", "Deadline" };
         static const char* SORT_ALGO_ITEMS[] = { "Quick", "Bubble" };
-
-        const data::Task* findTask(const data::TaskStore& store, int taskId) {
-            for (std::size_t i = 0; i < store.tasks.size(); ++i) {
-                if (store.tasks[i].id == taskId) {
-                    return &store.tasks[i];
-                }
-            }
-            return nullptr;
-        }
 
         void renderToolbar(UiState& uiState, int count) {
             ImGui::PushFont(fontHeading());
@@ -113,8 +105,7 @@ namespace ui {
             ImVec2 max = ImVec2(min.x + width, min.y + 132.0f);
 
             UrgencyColor pc = colorForPriority(task.priority);
-            ImU32 accent = IM_COL32((int)(pc.r * 255), (int)(pc.g * 255),
-                                    (int)(pc.b * 255), 255);
+            ImU32 accent = urgencyToImU32(pc);
 
             drawSoftShadow(dl, min, max, 18.0f,
                            selected ? IM_COL32(124, 58, 237, 28)
@@ -192,8 +183,8 @@ namespace ui {
 
         std::vector<data::Task> rows;
         rows.reserve(ids.size());
-        for (std::size_t i = 0; i < ids.size(); ++i) {
-            if (const data::Task* task = findTask(store, ids[i])) {
+        for (int taskId : ids) {
+            if (const data::Task* task = data::findTaskInStoreConst(store, taskId)) {
                 rows.push_back(*task);
             }
         }
@@ -210,8 +201,8 @@ namespace ui {
             ImGui::PopFont();
             ImGui::TextColored(ColTextFaint, "Try clearing filters or add a new task from the top bar.");
         } else {
-            for (std::size_t i = 0; i < rows.size(); ++i) {
-                renderTaskCard(store, rows[i], uiState.selectedTaskId == rows[i].id, today, uiState);
+            for (const data::Task& row : rows) {
+                renderTaskCard(store, row, uiState.selectedTaskId == row.id, today, uiState);
             }
         }
         ImGui::EndChild();

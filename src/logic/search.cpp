@@ -38,8 +38,7 @@ namespace logic {
                                               const std::string& query) {
         std::vector<int> out;
         out.reserve(store.tasks.size());
-        for (std::size_t i = 0; i < store.tasks.size(); ++i) {
-            const data::Task& t = store.tasks[i];
+        for (const data::Task& t : store.tasks) {
             if (containsIgnoreCase(t.title, query)) {
                 out.push_back(t.id);
             }
@@ -53,8 +52,7 @@ namespace logic {
                                      int filterStatus) {
         std::vector<int> out;
         out.reserve(store.tasks.size());
-        for (std::size_t i = 0; i < store.tasks.size(); ++i) {
-            const data::Task& t = store.tasks[i];
+        for (const data::Task& t : store.tasks) {
             if (filterPriority >= 0 &&
                 static_cast<int>(t.priority) != filterPriority) {
                 continue;

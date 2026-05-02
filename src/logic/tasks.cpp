@@ -12,15 +12,15 @@ namespace logic {
     std::vector<int> rootTaskIds(const data::TaskStore& store) {
         std::unordered_set<int> present;
         present.reserve(store.tasks.size());
-        for (std::size_t i = 0; i < store.tasks.size(); ++i) {
-            present.insert(store.tasks[i].id);
+        for (const data::Task& t : store.tasks) {
+            present.insert(t.id);
         }
         std::vector<int> out;
         out.reserve(store.tasks.size());
-        for (std::size_t i = 0; i < store.tasks.size(); ++i) {
-            int pid = store.tasks[i].parentId;
+        for (const data::Task& t : store.tasks) {
+            int pid = t.parentId;
             if (pid == -1 || present.find(pid) == present.end()) {
-                out.push_back(store.tasks[i].id);
+                out.push_back(t.id);
             }
         }
         return out;
@@ -28,9 +28,9 @@ namespace logic {
 
     std::vector<int> childTaskIds(const data::TaskStore& store, int parentId) {
         std::vector<int> out;
-        for (std::size_t i = 0; i < store.tasks.size(); ++i) {
-            if (store.tasks[i].parentId == parentId) {
-                out.push_back(store.tasks[i].id);
+        for (const data::Task& t : store.tasks) {
+            if (t.parentId == parentId) {
+                out.push_back(t.id);
             }
         }
         return out;
@@ -81,8 +81,8 @@ namespace logic {
         victims.push_back(rootId);
         collectDescendantIds(store, rootId, victims);
         int removed = 0;
-        for (std::size_t i = 0; i < victims.size(); ++i) {
-            if (data::removeTaskFromStore(store, victims[i])) {
+        for (int victimId : victims) {
+            if (data::removeTaskFromStore(store, victimId)) {
                 removed += 1;
             }
         }

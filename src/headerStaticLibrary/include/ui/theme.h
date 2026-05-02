@@ -49,6 +49,13 @@ namespace ui {
 
     struct UrgencyColor { float r, g, b, a; };
 
+    static inline ImU32 urgencyToImU32(const UrgencyColor& c) {
+        return IM_COL32(static_cast<int>(c.r * 255),
+                        static_cast<int>(c.g * 255),
+                        static_cast<int>(c.b * 255),
+                        255);
+    }
+
     UrgencyColor urgencyForDeadline(const data::Date& deadline,
                                     const data::Date& today,
                                     data::Status status);

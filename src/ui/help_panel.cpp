@@ -67,9 +67,8 @@ namespace ui {
                 std::error_code rec;
                 if (it->is_regular_file(rec)) {
                     std::string ext = it->path().extension().string();
-                    for (std::size_t k = 0; k < ext.size(); ++k) {
-                        char c = ext[k];
-                        if (c >= 'A' && c <= 'Z') ext[k] = static_cast<char>(c + ('a' - 'A'));
+                    for (char& c : ext) {
+                        if (c >= 'A' && c <= 'Z') c = static_cast<char>(c + ('a' - 'A'));
                     }
                     if (ext == ".dftasks") {
                         FoundFile f{};
@@ -289,10 +288,9 @@ namespace ui {
             ImGui::PopFont();
             ImGui::Dummy(ImVec2(1.0f, 8.0f));
 
-            for (std::size_t i = 0; i < s.results.size(); ++i) {
-                const FoundFile& f = s.results[i];
-
-                ImGui::PushID(static_cast<int>(i));
+            int rowIdx = 0;
+            for (const FoundFile& f : s.results) {
+                ImGui::PushID(rowIdx++);
                 ImVec2 mn = ImGui::GetCursorScreenPos();
                 float rowW = ImGui::GetContentRegionAvail().x;
                 ImVec2 mx = ImVec2(mn.x + rowW, mn.y + 70.0f);
