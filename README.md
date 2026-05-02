@@ -1,4 +1,4 @@
-<div align="center">
+﻿<div align="center">
 
 <img src="https://i.imgur.com/kIk8K5W.png" alt="DataForge Logo" width="700" />
 
@@ -19,7 +19,7 @@
 # 
 ## 📑 Table of Contents
 
-1. [🎯 About The Project](#-about-the-project)
+1. [🎯 About The Project & Docs](#-about-the-project)
 2. [✨ Features](#-features)
 3. [🚀 Installation & Run](#-installation--run)
    - [📋 Prerequisites](#-prerequisites)
@@ -35,15 +35,15 @@
 # 
 ## 🎯 About The Project
 
-**DataForge** is a single-window desktop **task management system** written in procedural C++20 and rendered with [Dear ImGui](https://github.com/ocornut/imgui). It treats work the way humans actually think about it — as a **tree of tasks and subtasks** — rather than a flat checklist.
+**DataForge** is a single-window desktop **task management system** written in procedural C++20 and rendered with [Dear ImGui](https://github.com/ocornut/imgui). It treats work the way humans actually think about it - as a **tree of tasks and subtasks** - rather than a flat checklist.
 
 That single design choice turns every requirement of the brief into something that feels native to the domain:
 
-- **Recursion** sums estimated time across a subtree, cascades deletions, and computes weighted completion — not a toy factorial.
+- **Recursion** sums estimated time across a subtree, cascades deletions, and computes weighted completion - not a toy factorial.
 - **Sorting** is offered in two hand-rolled flavours (Bubble & Quick), user-selectable, with a live benchmark panel that shows *why* algorithm choice matters.
 - **Searching** pairs a substring linear scan over titles (what users expect from a search bar) with a recursive binary search over a cached ID index (the fast internal lookup).
 
-Under the hood, DataForge is built on a strict **three-tier architecture** — *presentation → logic → data* — with one-way calls only. The presentation layer never touches the data layer directly; every mutation flows through the logic tier. No OOP, no classes, no inheritance — just structs and free functions passed explicitly between layers.
+Under the hood, DataForge is built on a strict **three-tier architecture** - *presentation → logic → data* - with one-way calls only. The presentation layer never touches the data layer directly; every mutation flows through the logic tier. No OOP, no classes, no inheritance - just structs and free functions passed explicitly between layers.
 ### 🏗️ Architecture at a glance
 
 ```
@@ -52,9 +52,21 @@ main.cpp  ──▶  presentation  ──▶  logic  ──▶  data
 ```
 ### 💎 Why it stands out
 
-- **Zero external dependencies** beyond the Windows SDK and vendored ImGui sources — no vcpkg, no NuGet, no package manager gymnastics.
+- **Zero external dependencies** beyond the Windows SDK and vendored ImGui sources - no vcpkg, no NuGet, no package manager gymnastics.
 - **Atomic save** via write-and-rename protects user data from mid-save crashes.
 - **Custom `.dftasks` text format** that you can read, diff, and edit in Notepad.
+
+---
+## 📚 Project Documentation
+
+<a href="Documentation/Project Documentation.docx"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Microsoft_Office_Word_%282019%E2%80%932025%29.svg/1280px-Microsoft_Office_Word_%282019%E2%80%932025%29.svg.png" alt="Word" width="20" align="center" /></a> [**.DOCX Documentation**](Documentation/DataForge.docx)
+<sub>↳ [View on SharePoint](https://codingburgas-my.sharepoint.com/:w:/g/personal/aktodorov24_codingburgas_bg/IQBXfEHxrQ-2SJYZcwL7JB3mAcd3PwZeh61K8_RZ5dkeYSg?e=7iP9yF)</sub>
+
+<a href="Documentation/Project Presentation.pptx"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Microsoft_Office_PowerPoint_%282025%E2%80%93present%29.svg/960px-Microsoft_Office_PowerPoint_%282025%E2%80%93present%29.svg.png" alt="PowerPoint" width="20" align="center" /></a> [**.PPTX Presentation**](Documentation/DataForge.pptx)
+<sub>↳ [View on SharePoint](https://codingburgas-my.sharepoint.com/:p:/g/personal/aktodorov24_codingburgas_bg/IQCjkuLBRDgZSZIjfndKJVKxARuX5CU3PTVg0-QQvy2Eos0?e=acQloL)</sub>
+
+<a href="Documentation/QA Test Case Reports.xlsx"><img src="https://upload.wikimedia.org/wikipedia/commons/6/60/Microsoft_Office_Excel_%282025%E2%80%93present%29.svg" alt="Word" width="20" align="center" /></a> [**.XLSX QA Reports**](Documentation/DataForge_QA_Report.docx)
+<sub>↳ [View on SharePoint](https://codingburgas-my.sharepoint.com/:x:/g/personal/aktodorov24_codingburgas_bg/IQBApk9PK0QMSbWBx_ToQ4O-AdkZUlzjqDHxvFH18TSOIL0?e=Re0Fwo)</sub>
 
 ---
 ## ✨ Features
@@ -62,7 +74,7 @@ main.cpp  ──▶  presentation  ──▶  logic  ──▶  data
 | Feature | Description |
 |---|---|
 | **Hierarchical Tasks** | Every task can have unlimited subtasks, forming a tree encoded by `parentId`. |
-| **Dual Sort Algorithms** | Bubble Sort (iterative, by priority DESC) and Quick Sort (recursive, by deadline ASC) — user-selectable. |
+| **Dual Sort Algorithms** | Bubble Sort (iterative, by priority DESC) and Quick Sort (recursive, by deadline ASC) - user-selectable. |
 | **Sort Benchmark Panel** | Generates *N* synthetic tasks and times both algorithms head-to-head in milliseconds. |
 | **Dual Search** | Case-insensitive substring linear search on titles plus recursive binary search by ID. |
 | **Recursive Aggregates** | Five domain-meaningful tree functions: total estimated time, weighted completion, descendant count, max depth, descendant-ID collection. |
@@ -71,12 +83,12 @@ main.cpp  ──▶  presentation  ──▶  logic  ──▶  data
 | **Statistics Panel** | Counts by priority, counts by status, overdue tasks, and total estimated time across all roots. |
 | **Urgency Coloring** | Deadline cells tint red when overdue, amber when ≤ 3 days away, green when comfortable. |
 | **Input Validation** | Invalid drafts are caught before they reach the store; errors show inline and as a toast. |
-| **Single-Step Undo** | Snapshot-based undo restores the store after a destructive operation — procedural-friendly, not command-based. |
+| **Single-Step Undo** | Snapshot-based undo restores the store after a destructive operation - procedural-friendly, not command-based. |
 | **Keyboard Shortcuts** | `Ctrl+N` new, `Ctrl+S` save, `Ctrl+O` open, `Ctrl+F` focus search, `Ctrl+Z` undo, `Del` remove selected, arrow keys to navigate. |
 | **Light / Dark Theme** | ImGui theme toggle persisted in `UiState`. |
-| **Atomic Persistence** | Human-readable `.dftasks` format written via write-and-rename — no corruption on crash. |
+| **Atomic Persistence** | Human-readable `.dftasks` format written via write-and-rename - no corruption on crash. |
 | **Dirty-Flag UX** | Window title marks unsaved changes; exit confirms if work is pending. |
-| **Status Bar** | Live total count, filtered count, last action, and save state — always visible. |
+| **Status Bar** | Live total count, filtered count, last action, and save state - always visible. |
 
 ---
 ## 🚀 Installation & Run
@@ -91,7 +103,7 @@ main.cpp  ──▶  presentation  ──▶  logic  ──▶  data
 | **Toolset** | MSVC with `/std:c++20` |
 | **Git** | Any recent version |
 
-No external package manager is required. Dear ImGui is vendored into `vendor/imgui/`.
+No external package manager is required. Dear ImGui is vendored into `src/vendor/imgui/`.
 
 ### 📦 Installation
 
@@ -127,15 +139,13 @@ DataForge/
 │   ├── main.cpp                     # Win32 + D3D11 + ImGui bootstrap, main loop
 │   ├── presentation layer        # Dear ImGui rendering & UiState (calls logic only)
 │   ├── logic layer               # Business rules, algorithms, validation
-│   └── data layer                # Task / TaskStore / Date structs, CRUD, file I/O
-│
-├── vendor/
-│   └── imgui/                       # Vendored Dear ImGui sources (pinned SHA in VERSION.txt)
-│       ├── imgui*.cpp / .h
-│       └── backends/
-│           ├── imgui_impl_win32.*
-│           └── imgui_impl_dx11.*
-│
+│   ├── data layer                # Task / TaskStore / Date structs, CRUD, file I/O
+│   └── vendor/
+│       └── imgui/                   # Vendored Dear ImGui sources (pinned SHA in VERSION.txt)
+│           ├── imgui*.cpp / .h
+│           └── backends/
+│               ├── imgui_impl_win32.*
+│               └── imgui_impl_dx11.*
 │
 ├── Documentation/                   # Architecture diagram and sprint reports
 │   ├── DOCX Documentation
@@ -165,10 +175,10 @@ DataForge/
 
 | Layer | Choice | Why |
 |---|---|---|
-| **Language** | C++20 | `std::optional`, structured bindings, `<=>`, `std::format`, `std::span`, designated initialisers — modern without being exotic. |
+| **Language** | C++20 | `std::optional`, structured bindings, `<=>`, `std::format`, `std::span`, designated initialisers - modern without being exotic. |
 | **Compiler** | MSVC (Visual Studio 2026), `/std:c++20`, `/W4 /WX` in Release | First-party Microsoft toolchain; no cross-compilation friction. |
-| **GUI** | [Dear ImGui](https://github.com/ocornut/imgui) (vendored) | Immediate-mode, single-window desktop apps in ~20 files. Pinned commit SHA in `vendor/imgui/VERSION.txt`. |
-| **Rendering Backend** | Win32 + Direct3D 11 | Zero external package managers — every header ships with the Windows SDK. |
+| **GUI** | [Dear ImGui](https://github.com/ocornut/imgui) (vendored) | Immediate-mode, single-window desktop apps in ~20 files. Pinned commit SHA in `src/vendor/imgui/VERSION.txt`. |
+| **Rendering Backend** | Win32 + Direct3D 11 | Zero external package managers - every header ships with the Windows SDK. |
 | **Build System** | Visual Studio `.sln` / `.vcxproj` | Single solution, one project for the app, optional test project. No NuGet, no vcpkg. |
 | **Persistence** | Custom `.dftasks` line-based text format | Human-readable, diff-friendly, zero library dependencies. |
 | **Linker Dependencies** | `d3d11.lib`, `dxgi.lib`, `d3dcompiler.lib` | Windows SDK only. |
@@ -188,10 +198,10 @@ DataForge/
 ---
 ## 🙏 Acknowledgements
 
-- **[Dear ImGui](https://github.com/ocornut/imgui)** by Omar Cornut — the immediate-mode GUI library at the heart of DataForge.
-- **[Shields.io](https://shields.io/)** — for all tech badges above.
-- **[Placehold.co](https://placehold.co/)** — placeholder imagery during early development.
-- **Microsoft Visual Studio & the Windows SDK** — the C++20 toolchain and D3D11 backend.
+- **[Dear ImGui](https://github.com/ocornut/imgui)** by Omar Cornut - the immediate-mode GUI library at the heart of DataForge.
+- **[Shields.io](https://shields.io/)** - for all tech badges above.
+- **[Placehold.co](https://placehold.co/)** - placeholder imagery during early development.
+- **Microsoft Visual Studio & the Windows SDK** - the C++20 toolchain and D3D11 backend.
 - Every author of the classic algorithms textbooks whose Bubble Sort, Quick Sort, and Binary Search we re-implement by hand in this repository.
 
 ---
