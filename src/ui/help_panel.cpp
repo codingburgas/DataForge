@@ -321,7 +321,8 @@ namespace ui {
                     uiState.triggeredOpenPath = true;
                 }
 
-                ImGui::SetCursorScreenPos(ImVec2(mn.x, mx.y + 8.0f));
+                ImGui::SetCursorScreenPos(mn);
+                ImGui::Dummy(ImVec2(rowW, 78.0f));
                 ImGui::PopID();
             }
 
