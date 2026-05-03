@@ -16,11 +16,32 @@ namespace ui {
         ImFont* gFontDisplay     = nullptr;
         ImFont* gFontMono        = nullptr;
 
+        static const ImWchar* extendedRanges() {
+            static const ImWchar ranges[] = {
+                0x0020, 0x00FF,  // Latin + Latin-1 supplement
+                0x0400, 0x04FF,  // Cyrillic
+                0x0500, 0x052F,  // Cyrillic supplement
+                0x2010, 0x205E,  // punctuation
+                0,
+            };
+            return ranges;
+        }
+
         ImFont* tryLoadFont(float size, const std::vector<const char*>& candidates) {
             ImGuiIO& io = ImGui::GetIO();
             for (const char* path : candidates) {
                 if (std::filesystem::exists(path)) {
-                    if (ImFont* font = io.Fonts->AddFontFromFileTTF(path, size)) {
+                    if (ImFont* font = io.Fonts->AddFontFromFileTTF(
+                            path, size, nullptr, extendedRanges())) {
+                        const char* segoe = "C:/Windows/Fonts/segoeui.ttf";
+                        if (std::filesystem::exists(segoe)) {
+                            ImFontConfig merge;
+                            merge.MergeMode = true;
+                            static const ImWchar cyr[] = {
+                                0x0400, 0x04FF, 0x0500, 0x052F, 0,
+                            };
+                            io.Fonts->AddFontFromFileTTF(segoe, size, &merge, cyr);
+                        }
                         return font;
                     }
                 }

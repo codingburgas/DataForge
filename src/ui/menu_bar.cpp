@@ -94,6 +94,18 @@ namespace ui {
                     uiState.language = LANG_ES;
                     setLanguage(LANG_ES);
                 }
+                if (ImGui::MenuItem(tr(K_MENU_LANG_DE), nullptr, uiState.language == LANG_DE)) {
+                    uiState.language = LANG_DE;
+                    setLanguage(LANG_DE);
+                }
+                if (ImGui::MenuItem(tr(K_MENU_LANG_BG), nullptr, uiState.language == LANG_BG)) {
+                    uiState.language = LANG_BG;
+                    setLanguage(LANG_BG);
+                }
+                if (ImGui::MenuItem(tr(K_MENU_LANG_RU), nullptr, uiState.language == LANG_RU)) {
+                    uiState.language = LANG_RU;
+                    setLanguage(LANG_RU);
+                }
                 ImGui::EndMenu();
             }
             ImGui::EndMenu();

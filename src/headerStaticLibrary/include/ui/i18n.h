@@ -6,7 +6,10 @@ namespace ui {
 
     enum Language {
         LANG_EN = 0,
-        LANG_ES = 1
+        LANG_ES = 1,
+        LANG_DE = 2,
+        LANG_BG = 3,
+        LANG_RU = 4
     };
 
     enum StringKey {
@@ -40,6 +43,9 @@ namespace ui {
         K_MENU_LANGUAGE,
         K_MENU_LANG_EN,
         K_MENU_LANG_ES,
+        K_MENU_LANG_DE,
+        K_MENU_LANG_BG,
+        K_MENU_LANG_RU,
 
         K_MENU_HELP,
         K_MENU_USER_GUIDE,
