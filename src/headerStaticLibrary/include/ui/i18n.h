@@ -33,6 +33,7 @@ namespace ui {
         K_MENU_BENCHMARK,
         K_MENU_LIGHT_THEME,
         K_MENU_DARK_THEME,
+        K_MENU_THEME,
 
         K_MENU_ALGORITHMS,
         K_MENU_PRIORITY_ORDER,

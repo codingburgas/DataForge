@@ -81,7 +81,7 @@ namespace ui {
         ui.showConfirmDelete    = false;
         ui.showDirtyExitConfirm = false;
 
-        ui.useDarkTheme    = false;
+        ui.theme           = THEME_LIGHT;
         ui.requestedQuit   = false;
         ui.triggeredSave   = false;
         ui.triggeredSaveAs = false;

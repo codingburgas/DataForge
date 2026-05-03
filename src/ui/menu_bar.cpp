@@ -76,13 +76,18 @@ namespace ui {
                 uiState.activeNavItem = NAV_BENCHMARK;
             }
             ImGui::Separator();
-            if (ImGui::MenuItem(tr(K_MENU_LIGHT_THEME), nullptr, !uiState.useDarkTheme)) {
-                uiState.useDarkTheme = false;
-                applyLightTheme();
-            }
-            if (ImGui::MenuItem(tr(K_MENU_DARK_THEME), nullptr, uiState.useDarkTheme)) {
-                uiState.useDarkTheme = true;
-                applyDarkTheme();
+            if (ImGui::BeginMenu(tr(K_MENU_THEME))) {
+                for (int i = 0; i < THEME_COUNT; ++i) {
+                    ThemeChoice t = static_cast<ThemeChoice>(i);
+                    const char* label = themeName(t);
+                    if (t == THEME_LIGHT) label = tr(K_MENU_LIGHT_THEME);
+                    else if (t == THEME_DARK) label = tr(K_MENU_DARK_THEME);
+                    if (ImGui::MenuItem(label, nullptr, uiState.theme == t)) {
+                        uiState.theme = t;
+                        applyThemeChoice(t);
+                    }
+                }
+                ImGui::EndMenu();
             }
             ImGui::Separator();
             if (ImGui::BeginMenu(tr(K_MENU_LANGUAGE))) {

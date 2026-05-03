@@ -5,6 +5,7 @@
 #include "logic/sort.h"
 #include "logic/benchmark.h"
 #include "ui/i18n.h"
+#include "ui/theme.h"
 
 namespace ui {
 
@@ -54,7 +55,7 @@ namespace ui {
         bool showConfirmDelete;
         bool showDirtyExitConfirm;
 
-        bool useDarkTheme;
+        ThemeChoice theme;
         bool requestedQuit;
         bool triggeredSave;
         bool triggeredSaveAs;

@@ -29,14 +29,38 @@ namespace ui {
     inline ImVec4 ColShadow        = HEX(0x0F172A, 0.08f);
     inline ImVec4 ColShadowStrong  = HEX(0x0F172A, 0.14f);
 
+    inline ImVec4 ColAccent        = HEX(0x7C3AED);
+    inline ImVec4 ColAccentHover   = HEX(0x6D28D9);
+    inline ImVec4 ColAccentActive  = HEX(0x5B21B6);
+    inline ImVec4 ColAccentAlt     = HEX(0xEC4899);
+
     inline const ImU32 GradLeft  = IM_COL32(124,  58, 237, 255);
     inline const ImU32 GradMid   = IM_COL32(236,  72, 153, 255);
     inline const ImU32 GradRight = IM_COL32(249, 115,  22, 255);
+
+    enum ThemeChoice {
+        THEME_LIGHT = 0,
+        THEME_DARK,
+        THEME_SOLARIZED_LIGHT,
+        THEME_SOLARIZED_DARK,
+        THEME_NORD,
+        THEME_DRACULA,
+        THEME_MONOKAI,
+        THEME_HIGH_CONTRAST,
+        THEME_COUNT
+    };
+
+    static inline ImVec4 withAlpha(ImVec4 c, float a) {
+        return ImVec4(c.x, c.y, c.z, a);
+    }
 
     void loadFonts();
     void applyTheme();
     void applyDarkTheme();
     void applyLightTheme();
+    void applyThemeChoice(ThemeChoice t);
+    ThemeChoice currentThemeChoice();
+    const char* themeName(ThemeChoice t);
     bool isDarkTheme();
     ImU32 cardBgU32();
     ImU32 cardBorderU32();
