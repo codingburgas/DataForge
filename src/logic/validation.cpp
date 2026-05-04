@@ -5,6 +5,8 @@
 
 namespace logic {
 
+    // Trim all leading/trailing ASCII whitespace. Done by hand so the
+    // validation layer has no dependency on locale or <algorithm>.
     static std::string trim(const std::string& s) {
         std::size_t start = 0;
         std::size_t end   = s.size();
@@ -27,6 +29,9 @@ namespace logic {
         return s.substr(start, end - start);
     }
 
+    // Walks parent chain and returns true if attaching a new child under
+    // `parentId` would push the subtree past `maxDepth`. Stops as soon as
+    // the budget is blown so we never traverse a corrupted infinite chain.
     bool wouldExceedDepth(const data::TaskStore& store,
                           int parentId,
                           int maxDepth) {
@@ -46,6 +51,10 @@ namespace logic {
         return false;
     }
 
+    // Cycle detection: walks up from the candidate parent and returns true
+    // if we ever reach `taskId` (which would mean the task is being made
+    // its own ancestor). Bounded by MAX_TREE_DEPTH+1 hops so a pre-existing
+    // cycle in the store cannot lock the editor up.
     bool createsCycle(const data::TaskStore& store,
                       int taskId,
                       int candidateParentId) {
@@ -68,15 +77,22 @@ namespace logic {
             cur   = p->parentId;
             hops += 1;
         }
+        // Hit the hop limit without resolving — treat as a cycle so the
+        // edit is rejected rather than silently accepted.
         return hops >= MAX_TREE_DEPTH + 1;
     }
 
+    // Single entry point used for both create and edit. `isEdit` flips
+    // on the cycle check, since cycles are only meaningful when the task
+    // already exists in the store.
     ValidationResult validateDraftTask(const data::TaskStore& store,
                                        const data::Task& draft,
                                        bool isEdit) {
         ValidationResult r;
         r.ok = false;
 
+        // Title is the only required field. Trim first so a string of
+        // whitespace doesn't masquerade as a real title.
         std::string title = trim(draft.title);
         if (title.empty()) {
             r.message = "Title is required.";
@@ -90,6 +106,8 @@ namespace logic {
             r.message = "Description must be at most 2000 characters.";
             return r;
         }
+        // Enum range checks defend against malformed .dftasks input where
+        // someone hand-edited the priority/status integer.
         if (draft.priority < data::PRIORITY_LOW ||
             draft.priority > data::PRIORITY_CRITICAL) {
             r.message = "Priority is out of range.";
@@ -104,6 +122,8 @@ namespace logic {
             r.message = "Deadline is not a valid date.";
             return r;
         }
+        // Cap minutes at one year so a typo (e.g. 9999999) cannot make
+        // the stats panel render absurd totals.
         if (draft.estimatedMinutes < 0 || draft.estimatedMinutes > 24 * 60 * 365) {
             r.message = "Estimated minutes is out of range.";
             return r;
@@ -123,6 +143,8 @@ namespace logic {
                 r.message = "Parent assignment would create a cycle.";
                 return r;
             }
+            // -1 because attaching a new child adds one more level beneath
+            // whatever depth the parent already sits at.
             if (wouldExceedDepth(store, draft.parentId, MAX_TREE_DEPTH - 1)) {
                 r.message = "Adding here would exceed the maximum tree depth.";
                 return r;

@@ -5,6 +5,12 @@
 
 namespace logic {
 
+    // All recursive walks below carry an explicit `depth` counter and bail
+    // when MAX_TREE_DEPTH is exceeded. This is a defence against malformed
+    // .dftasks files that could encode a parent cycle the validator missed,
+    // turning an unbounded recursion into a bounded no-op rather than a
+    // stack overflow.
+
     static int calcTotalMinutesInner(const data::TaskStore& store,
                                      int id,
                                      int depth) {
@@ -15,6 +21,7 @@ namespace logic {
         if (t == nullptr) {
             return 0;
         }
+        // Sum own estimate plus the sum of every descendant's estimate.
         int total = t->estimatedMinutes;
         std::vector<int> children = childTaskIds(store, id);
         for (int childId : children) {
@@ -27,10 +34,19 @@ namespace logic {
         return calcTotalMinutesInner(store, id, 0);
     }
 
+    // We weight each node by its estimated minutes so a 10-minute leaf
+    // does not count as much as a 5-hour leaf. A zero estimate is bumped
+    // to 1 so leaves without an estimate still influence the rollup
+    // instead of disappearing from the average.
     static int effectiveMinutes(const data::Task& t) {
         return t.estimatedMinutes > 0 ? t.estimatedMinutes : 1;
     }
 
+    // Returns weighted completion in [0,1]. A node contributes its own
+    // done/not-done state as a value, weighted by its effective minutes,
+    // and each child contributes its recursive result weighted by the
+    // child's effective minutes. Childless nodes return their own state
+    // directly so the recursion has a clean base case.
     static float calcWeightedInner(const data::TaskStore& store,
                                    int id,
                                    int depth) {
@@ -47,6 +63,8 @@ namespace logic {
         if (children.empty()) {
             return ownCompletion;
         }
+        // Use long long / double for the running totals so deep trees with
+        // large minute estimates do not overflow or accumulate float drift.
         long long totalWeight = ownWeight;
         double    weightedSum = static_cast<double>(ownCompletion) * ownWeight;
         for (int childId : children) {
@@ -70,6 +88,8 @@ namespace logic {
         return calcWeightedInner(store, id, 0);
     }
 
+    // Counts every descendant but NOT the root itself, matching how the
+    // delete-confirmation dialog phrases "this task plus N descendants".
     static int countDescInner(const data::TaskStore& store,
                               int id,
                               int depth) {
@@ -88,6 +108,9 @@ namespace logic {
         return countDescInner(store, id, 0);
     }
 
+    // Depth of the tallest path below `id`. A leaf has depth 0; a node
+    // with a single leaf child has depth 1. Used by the stats panel and
+    // by the "would adding here exceed max depth?" validator.
     static int depthInner(const data::TaskStore& store, int id, int depth) {
         if (depth > MAX_TREE_DEPTH) {
             return 0;
@@ -110,6 +133,9 @@ namespace logic {
         return depthInner(store, id, 0);
     }
 
+    // Pre-order collection (parent before children would be more natural
+    // here, but the cascade-delete caller adds the root explicitly first,
+    // so we only emit descendants).
     static void collectInner(const data::TaskStore& store,
                              int id,
                              int depth,
@@ -130,6 +156,9 @@ namespace logic {
         collectInner(store, id, 0, out);
     }
 
+    // Iterative — counts overdue across the whole store, not a subtree.
+    // Tasks with no deadline (zero date) are skipped, as are completed
+    // tasks: a done task can never be "overdue" in a useful sense.
     int countOverdueTasks(const data::TaskStore& store,
                           const data::Date& today) {
         int count = 0;

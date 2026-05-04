@@ -2,6 +2,9 @@
 
 namespace data {
 
+    // The "zero date" {0,0,0} is a sentinel meaning "no date set" —
+    // used by tasks with no deadline. Real dates always start at year
+    // 1900 so there is no ambiguity.
     Date makeZeroDate() {
         return Date{ 0, 0, 0 };
     }
@@ -10,6 +13,7 @@ namespace data {
         return d.year == 0 && d.month == 0 && d.day == 0;
     }
 
+    // Standard Gregorian leap year rule.
     static bool isLeapYear(int year) {
         return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
     }
@@ -27,6 +31,9 @@ namespace data {
         return TABLE[month - 1];
     }
 
+    // The zero date is treated as valid so "no deadline" round-trips
+    // through the validator without complaint. Real dates must lie in
+    // [1900, 9999] and resolve to a real day-of-month.
     bool isDateValid(const Date& d) {
         if (isDateZero(d)) {
             return true;
@@ -44,6 +51,10 @@ namespace data {
         return true;
     }
 
+    // Total ordering with one twist: zero dates sort AFTER real dates.
+    // That puts "no deadline" tasks at the bottom of an ascending sort,
+    // which is what users expect (real deadlines come first, undated
+    // tasks fall to the end).
     int compareDates(const Date& a, const Date& b) {
         bool azero = isDateZero(a);
         bool bzero = isDateZero(b);
@@ -62,6 +73,9 @@ namespace data {
         return 0;
     }
 
+    // Local time on purpose — deadlines are calendar concepts, not
+    // timestamps, so a user on the train at midnight UTC should see
+    // the date their wall clock shows.
     Date makeToday() {
         std::time_t now = std::time(nullptr);
         std::tm local{};
@@ -80,6 +94,8 @@ namespace data {
         return d;
     }
 
+    // ISO 8601 date format (YYYY-MM-DD). Zero dates serialise to an
+    // empty string so they take zero bytes in the .dftasks file.
     std::string formatDate(const Date& d) {
         if (isDateZero(d)) {
             return std::string();
@@ -90,6 +106,9 @@ namespace data {
         return std::string(buf);
     }
 
+    // Strict ISO 8601 parser. Accepts only "YYYY-MM-DD" and the empty
+    // string (which round-trips to a zero date). Anything else is
+    // rejected so the loader cannot silently accept malformed input.
     bool parseDate(const std::string& text, Date& out) {
         if (text.empty()) {
             out = makeZeroDate();
@@ -121,6 +140,10 @@ namespace data {
         return true;
     }
 
+    // Standard Julian Day Number formula (Fliegel & Van Flandern).
+    // Converts a calendar date to a single integer so daysBetween() can
+    // be a plain subtraction — the formula handles leap years and
+    // varying month lengths automatically.
     static long long julianDayNumber(const Date& d) {
         int y = d.year;
         int m = d.month;

@@ -4,6 +4,10 @@
 
 namespace logic {
 
+    // Generates a deterministic batch of tasks for the benchmark panel.
+    // Same seed produces the same dataset on every run so the user can
+    // re-run the comparison and trust that any timing change is the
+    // algorithm, not the input.
     std::vector<data::Task> generateSyntheticTasks(int count, unsigned seed) {
         std::vector<data::Task> v;
         if (count <= 0) {
@@ -15,8 +19,11 @@ namespace logic {
             data::PRIORITY_LOW, data::PRIORITY_CRITICAL);
         std::uniform_int_distribution<int> yearOffsetDist(-1, 3);
         std::uniform_int_distribution<int> monthDist(1, 12);
+        // Cap day at 28 to avoid month-end edge cases for the random data.
         std::uniform_int_distribution<int> dayDist(1, 28);
         std::uniform_int_distribution<int> minDist(5, 600);
+        // Roughly 80% of synthetic tasks get a deadline; the rest stay
+        // zero-dated to exercise the "no deadline" code paths.
         std::uniform_int_distribution<int> hasDeadlineDist(0, 9);
 
         data::Date today = logic::today();
@@ -46,6 +53,10 @@ namespace logic {
         return v;
     }
 
+    // Times bubble sort and quicksort on identical input. We copy the
+    // generated batch into two vectors so each algorithm starts from the
+    // exact same unsorted state — otherwise the second one would benefit
+    // from already being partially sorted by the first run.
     SortBenchmarkResult benchmarkSortAlgorithms(int itemCount, unsigned seed) {
         SortBenchmarkResult r{};
         r.itemCount = itemCount;

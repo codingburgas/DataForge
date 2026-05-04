@@ -59,13 +59,13 @@ main.cpp  ──▶  presentation  ──▶  logic  ──▶  data
 ---
 ## 📚 Project Documentation
 
-<a href="Documentation/Project Documentation.docx"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Microsoft_Office_Word_%282019%E2%80%932025%29.svg/1280px-Microsoft_Office_Word_%282019%E2%80%932025%29.svg.png" alt="Word" width="20" align="center" /></a> [**.DOCX Documentation**](Documentation/DataForge.docx)
+<a href="Documentation/Project%20Documentation.docx"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Microsoft_Office_Word_%282019%E2%80%932025%29.svg/1280px-Microsoft_Office_Word_%282019%E2%80%932025%29.svg.png" alt="Word" width="20" align="center" /></a> [**.DOCX Documentation**](Documentation/Project%20Documentation.docx)
 <sub>↳ [View on SharePoint](https://codingburgas-my.sharepoint.com/:w:/g/personal/aktodorov24_codingburgas_bg/IQBXfEHxrQ-2SJYZcwL7JB3mAcd3PwZeh61K8_RZ5dkeYSg?e=7iP9yF)</sub>
 
-<a href="Documentation/Project Presentation.pptx"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Microsoft_Office_PowerPoint_%282025%E2%80%93present%29.svg/960px-Microsoft_Office_PowerPoint_%282025%E2%80%93present%29.svg.png" alt="PowerPoint" width="20" align="center" /></a> [**.PPTX Presentation**](Documentation/DataForge.pptx)
+<a href="Documentation/Project%20Presentation.pptx"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Microsoft_Office_PowerPoint_%282025%E2%80%93present%29.svg/960px-Microsoft_Office_PowerPoint_%282025%E2%80%93present%29.svg.png" alt="PowerPoint" width="20" align="center" /></a> [**.PPTX Presentation**](Documentation/Project%20Presentation.pptx)
 <sub>↳ [View on SharePoint](https://codingburgas-my.sharepoint.com/:p:/g/personal/aktodorov24_codingburgas_bg/IQCjkuLBRDgZSZIjfndKJVKxARuX5CU3PTVg0-QQvy2Eos0?e=acQloL)</sub>
 
-<a href="Documentation/QA Test Case Reports.xlsx"><img src="https://upload.wikimedia.org/wikipedia/commons/6/60/Microsoft_Office_Excel_%282025%E2%80%93present%29.svg" alt="Word" width="20" align="center" /></a> [**.XLSX QA Reports**](Documentation/DataForge_QA_Report.docx)
+<a href="Documentation/QA%20Test%20Case%20Reports.xlsx"><img src="https://upload.wikimedia.org/wikipedia/commons/6/60/Microsoft_Office_Excel_%282025%E2%80%93present%29.svg" alt="Excel" width="20" align="center" /></a> [**.XLSX QA Reports**](Documentation/QA%20Test%20Case%20Reports.xlsx)
 <sub>↳ [View on SharePoint](https://codingburgas-my.sharepoint.com/:x:/g/personal/aktodorov24_codingburgas_bg/IQBApk9PK0QMSbWBx_ToQ4O-AdkZUlzjqDHxvFH18TSOIL0?e=Re0Fwo)</sub>
 
 ---

@@ -2,6 +2,9 @@
 
 namespace logic {
 
+    // ASCII-only lowercase. Avoids std::tolower because the global locale
+    // can corrupt non-ASCII bytes in UTF-8 task titles; this stays a no-op
+    // on bytes outside [A-Z], which is safe for our search use case.
     static char toLowerAscii(char c) {
         if (c >= 'A' && c <= 'Z') {
             return static_cast<char>(c - 'A' + 'a');
@@ -9,6 +12,9 @@ namespace logic {
         return c;
     }
 
+    // Naive O(n*m) substring scan. We intentionally avoid std::search so
+    // the search algorithm is visible and graded as hand-rolled. Empty
+    // needle matches everything, matching typical search-bar UX.
     static bool containsIgnoreCase(const std::string& haystack,
                                    const std::string& needle) {
         if (needle.empty()) {
@@ -34,6 +40,8 @@ namespace logic {
         return false;
     }
 
+    // Linear search by title — what users expect a free-text search to do.
+    // Returns IDs (not indices) so the result survives later store edits.
     std::vector<int> searchTasksByTitleLinear(const data::TaskStore& store,
                                               const std::string& query) {
         std::vector<int> out;
@@ -46,6 +54,8 @@ namespace logic {
         return out;
     }
 
+    // Compose filter + search in a single pass. -1 sentinels mean "no
+    // filter on this dimension", which keeps the UI binding simple.
     std::vector<int> filterAndSearch(const data::TaskStore& store,
                                      const std::string& query,
                                      int filterPriority,
@@ -69,11 +79,15 @@ namespace logic {
         return out;
     }
 
+    // Recursive binary search. Pre-condition: caller passes a vector
+    // sorted by Task::id ascending (see buildSortedByIdCopy below).
+    // Returns -1 when not found. O(log n).
     int findTaskIndexByIdBinary(const std::vector<data::Task>& sorted,
                                 int lo, int hi, int id) {
         if (lo > hi) {
             return -1;
         }
+        // Avoid (lo + hi) / 2 to prevent integer overflow on large ranges.
         int mid = lo + (hi - lo) / 2;
         int v   = sorted[mid].id;
         if (v == id) {
@@ -85,6 +99,7 @@ namespace logic {
         return findTaskIndexByIdBinary(sorted, lo, mid - 1, id);
     }
 
+    // Convenience overload that drives the recursion from the full range.
     int findTaskIndexByIdBinary(const std::vector<data::Task>& sorted, int id) {
         if (sorted.empty()) {
             return -1;
@@ -94,6 +109,9 @@ namespace logic {
                                        id);
     }
 
+    // Build the sorted-by-id snapshot the recursive binary search expects.
+    // We do not keep the store itself sorted by id because the table view
+    // wants insertion order; this small copy is the price for that.
     std::vector<data::Task> buildSortedByIdCopy(const data::TaskStore& store) {
         std::vector<data::Task> copy = store.tasks;
         std::sort(copy.begin(), copy.end(),
