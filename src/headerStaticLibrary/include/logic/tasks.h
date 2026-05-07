@@ -44,4 +44,12 @@ namespace logic {
     void restoreSnapshot(data::TaskStore& store,
                          const data::TaskStore& snapshot);
 
+    // Apply a decision pick: sets task status to the option's effect,
+    // marks chosenIndex on the decision, and pushes a history entry.
+    // Returns false if any index is out of range.
+    bool applyDecision(data::TaskStore& store,
+                       int taskId,
+                       int decisionIndex,
+                       int optionIndex);
+
 }

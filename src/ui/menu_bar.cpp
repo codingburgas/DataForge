@@ -75,6 +75,12 @@ namespace ui {
             if (ImGui::MenuItem(tr(K_MENU_BENCHMARK), nullptr, uiState.activeNavItem == NAV_BENCHMARK)) {
                 uiState.activeNavItem = NAV_BENCHMARK;
             }
+            if (ImGui::MenuItem("Productivity", nullptr, uiState.activeNavItem == NAV_PRODUCTIVITY)) {
+                uiState.activeNavItem = NAV_PRODUCTIVITY;
+            }
+            if (ImGui::MenuItem("History", nullptr, uiState.activeNavItem == NAV_HISTORY)) {
+                uiState.activeNavItem = NAV_HISTORY;
+            }
             ImGui::Separator();
             if (ImGui::BeginMenu(tr(K_MENU_THEME))) {
                 for (int i = 0; i < THEME_COUNT; ++i) {

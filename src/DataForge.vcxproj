@@ -152,6 +152,8 @@
     </ClCompile>
     <ClCompile Include="logic\benchmark.cpp" />
     <ClCompile Include="logic\dates.cpp" />
+    <ClCompile Include="logic\history.cpp" />
+    <ClCompile Include="logic\productivity.cpp" />
     <ClCompile Include="ui\ui_state.cpp" />
     <ClCompile Include="ui\i18n.cpp" />
     <ClCompile Include="ui\app_shell.cpp" />
@@ -163,6 +165,8 @@
     <ClCompile Include="ui\stats_panel.cpp" />
     <ClCompile Include="ui\benchmark_panel.cpp" />
     <ClCompile Include="ui\help_panel.cpp" />
+    <ClCompile Include="ui\history_panel.cpp" />
+    <ClCompile Include="ui\productivity_panel.cpp" />
     <ClCompile Include="ui\status_bar.cpp" />
     <ClCompile Include="ui\toast.cpp" />
     <ClCompile Include="ui\theme.cpp" />
@@ -191,6 +195,8 @@
     <ClInclude Include="headerStaticLibrary\include\logic\persistence.h" />
     <ClInclude Include="headerStaticLibrary\include\logic\benchmark.h" />
     <ClInclude Include="headerStaticLibrary\include\logic\dates.h" />
+    <ClInclude Include="headerStaticLibrary\include\logic\history.h" />
+    <ClInclude Include="headerStaticLibrary\include\logic\productivity.h" />
     <ClInclude Include="headerStaticLibrary\include\ui\ui_state.h" />
     <ClInclude Include="headerStaticLibrary\include\ui\i18n.h" />
     <ClInclude Include="headerStaticLibrary\include\ui\app_shell.h" />
@@ -202,6 +208,8 @@
     <ClInclude Include="headerStaticLibrary\include\ui\stats_panel.h" />
     <ClInclude Include="headerStaticLibrary\include\ui\benchmark_panel.h" />
     <ClInclude Include="headerStaticLibrary\include\ui\help_panel.h" />
+    <ClInclude Include="headerStaticLibrary\include\ui\history_panel.h" />
+    <ClInclude Include="headerStaticLibrary\include\ui\productivity_panel.h" />
     <ClInclude Include="headerStaticLibrary\include\ui\status_bar.h" />
     <ClInclude Include="headerStaticLibrary\include\ui\toast.h" />
     <ClInclude Include="headerStaticLibrary\include\ui\theme.h" />

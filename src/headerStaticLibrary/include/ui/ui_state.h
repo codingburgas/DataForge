@@ -10,11 +10,13 @@
 namespace ui {
 
     enum NavItem {
-        NAV_OVERVIEW = 0,
-        NAV_TASKS = 1,
-        NAV_ANALYTICS = 2,
-        NAV_BENCHMARK = 3,
-        NAV_HELP = 4
+        NAV_OVERVIEW     = 0,
+        NAV_TASKS        = 1,
+        NAV_ANALYTICS    = 2,
+        NAV_BENCHMARK    = 3,
+        NAV_HELP         = 4,
+        NAV_HISTORY      = 5,
+        NAV_PRODUCTIVITY = 6
     };
 
     constexpr int SEARCH_BUF_SIZE   = 256;
@@ -83,6 +85,19 @@ namespace ui {
         Language language;
 
         EditBuffers edit;
+
+        // Filter for the history panel. -1 means show all action types.
+        int historyFilter;
+
+        // Working buffers for the decision editor inside the add/edit
+        // dialog. Persist on the UiState so input survives across frames
+        // while the modal is open. decisionsScratch holds the in-progress
+        // edits so they only apply to the task on Save.
+        char decisionQuestionBuf[256];
+        char decisionOptionBuf  [128];
+        int  decisionOptionEffect;
+        int  decisionEditingIndex;
+        std::vector<data::Decision> decisionsScratch;
     };
 
     void initUiState(UiState& ui);

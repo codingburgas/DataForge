@@ -127,6 +127,107 @@ namespace ui {
             ImGui::PopStyleVar();
         }
 
+        void renderDecisionEditor(UiState& uiState, float formW) {
+            ImGui::Dummy(ImVec2(1.0f, 12.0f));
+            ImGui::PushFont(fontUiSemibold());
+            ImGui::TextColored(ColTextSecondary, "Decisions");
+            ImGui::PopFont();
+            ImGui::TextColored(ColTextFaint,
+                               "Optional. Picking an option later updates task status.");
+            ImGui::Dummy(ImVec2(1.0f, 6.0f));
+
+            const char* STATUS_NAMES[] = {
+                statusLabel(data::STATUS_TODO),
+                statusLabel(data::STATUS_IN_PROGRESS),
+                statusLabel(data::STATUS_DONE),
+                statusLabel(data::STATUS_BLOCKED)
+            };
+
+            for (std::size_t di = 0; di < uiState.decisionsScratch.size(); ++di) {
+                ImGui::PushID(static_cast<int>(di));
+                data::Decision& dec = uiState.decisionsScratch[di];
+
+                ImGui::TextColored(ColTextPrimary, "%zu. %s",
+                                   di + 1,
+                                   dec.question.empty()
+                                       ? "(no question)"
+                                       : dec.question.c_str());
+                ImGui::SameLine(formW - 60.0f);
+                if (ImGui::SmallButton("Remove")) {
+                    uiState.decisionsScratch.erase(
+                        uiState.decisionsScratch.begin() + di);
+                    ImGui::PopID();
+                    break;
+                }
+
+                for (std::size_t oi = 0; oi < dec.options.size(); ++oi) {
+                    const data::DecisionOption& opt = dec.options[oi];
+                    ImGui::Bullet();
+                    ImGui::SameLine();
+                    ImGui::TextColored(ColTextMuted,
+                                       "%s -> %s",
+                                       opt.text.c_str(),
+                                       statusLabel(opt.effect));
+                    ImGui::SameLine();
+                    char rid[32];
+                    std::snprintf(rid, sizeof(rid), "x##rmopt_%zu", oi);
+                    if (ImGui::SmallButton(rid)) {
+                        dec.options.erase(dec.options.begin() + oi);
+                        break;
+                    }
+                }
+
+                if (uiState.decisionEditingIndex == static_cast<int>(di)) {
+                    ImGui::SetNextItemWidth(formW * 0.55f);
+                    ImGui::InputTextWithHint("##optText",
+                                             "New option text",
+                                             uiState.decisionOptionBuf,
+                                             sizeof(uiState.decisionOptionBuf));
+                    ImGui::SameLine(0, 6.0f);
+                    ImGui::SetNextItemWidth(formW * 0.20f);
+                    ImGui::Combo("##optEffect", &uiState.decisionOptionEffect,
+                                 STATUS_NAMES, IM_ARRAYSIZE(STATUS_NAMES));
+                    ImGui::SameLine(0, 6.0f);
+                    if (ImGui::Button("Add option")) {
+                        if (uiState.decisionOptionBuf[0] != '\0') {
+                            data::DecisionOption opt;
+                            opt.text   = std::string(uiState.decisionOptionBuf);
+                            opt.effect = static_cast<data::Status>(
+                                uiState.decisionOptionEffect);
+                            dec.options.push_back(opt);
+                            uiState.decisionOptionBuf[0] = '\0';
+                        }
+                    }
+                } else {
+                    if (ImGui::SmallButton("+ Add option")) {
+                        uiState.decisionEditingIndex = static_cast<int>(di);
+                        uiState.decisionOptionBuf[0] = '\0';
+                    }
+                }
+
+                ImGui::Dummy(ImVec2(1.0f, 8.0f));
+                ImGui::PopID();
+            }
+
+            ImGui::SetNextItemWidth(formW * 0.75f);
+            ImGui::InputTextWithHint("##newDecQ",
+                                     "New decision question...",
+                                     uiState.decisionQuestionBuf,
+                                     sizeof(uiState.decisionQuestionBuf));
+            ImGui::SameLine(0, 8.0f);
+            if (ImGui::Button("+ Add decision")) {
+                if (uiState.decisionQuestionBuf[0] != '\0') {
+                    data::Decision dec;
+                    dec.question    = std::string(uiState.decisionQuestionBuf);
+                    dec.chosenIndex = -1;
+                    uiState.decisionsScratch.push_back(dec);
+                    uiState.decisionQuestionBuf[0] = '\0';
+                    uiState.decisionEditingIndex   =
+                        static_cast<int>(uiState.decisionsScratch.size()) - 1;
+                }
+            }
+        }
+
         void setupModal(ImVec2 size) {
             ImVec2 center = ImGui::GetMainViewport()->GetCenter();
             ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
@@ -151,6 +252,11 @@ namespace ui {
         uiState.showAddEditDialog = true;
         uiState.lastValidationOk  = true;
         uiState.lastValidationMessage.clear();
+        uiState.decisionsScratch.clear();
+        uiState.decisionEditingIndex   = -1;
+        uiState.decisionQuestionBuf[0] = '\0';
+        uiState.decisionOptionBuf  [0] = '\0';
+        uiState.decisionOptionEffect   = data::STATUS_DONE;
     }
 
     void openEditDialog(UiState& uiState, const data::Task& task) {
@@ -159,6 +265,11 @@ namespace ui {
         uiState.showAddEditDialog = true;
         uiState.lastValidationOk  = true;
         uiState.lastValidationMessage.clear();
+        uiState.decisionsScratch       = task.decisions;
+        uiState.decisionEditingIndex   = -1;
+        uiState.decisionQuestionBuf[0] = '\0';
+        uiState.decisionOptionBuf  [0] = '\0';
+        uiState.decisionOptionEffect   = data::STATUS_DONE;
     }
 
     void openConfirmDelete(UiState& uiState, int taskId) {
@@ -199,6 +310,7 @@ namespace ui {
         float formW = width - 48.0f;
         ImGui::Indent(24.0f);
         renderForm(store, uiState, formW);
+        renderDecisionEditor(uiState, formW);
         ImGui::Unindent(24.0f);
 
         ImGui::Dummy(ImVec2(1.0f, 10.0f));
@@ -242,6 +354,7 @@ namespace ui {
             }
 
             applyEditBuffersToTask(uiState.edit, task);
+            task.decisions = uiState.decisionsScratch;
             logic::ValidationResult vr;
             if (uiState.editingTaskId > 0) {
                 task.id = uiState.editingTaskId;

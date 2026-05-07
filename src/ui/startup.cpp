@@ -141,7 +141,7 @@ namespace ui {
             return 2;
         }
 
-        ::ShowWindow(window.hwnd, SW_SHOWDEFAULT);
+        ::ShowWindow(window.hwnd, SW_SHOWMAXIMIZED);
         ::UpdateWindow(window.hwnd);
 
         if (!platform::initImGui(renderer, window.hwnd)) {

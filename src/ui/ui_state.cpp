@@ -110,6 +110,13 @@ namespace ui {
         setLanguage(ui.language);
 
         clearEditBuffers(ui.edit);
+
+        ui.historyFilter            = -1;
+        ui.decisionQuestionBuf[0]   = '\0';
+        ui.decisionOptionBuf  [0]   = '\0';
+        ui.decisionOptionEffect     = data::STATUS_DONE;
+        ui.decisionEditingIndex     = -1;
+        ui.decisionsScratch.clear();
     }
 
 }

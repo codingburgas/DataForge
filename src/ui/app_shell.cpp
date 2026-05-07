@@ -7,6 +7,8 @@
 #include "ui/stats_panel.h"
 #include "ui/benchmark_panel.h"
 #include "ui/help_panel.h"
+#include "ui/history_panel.h"
+#include "ui/productivity_panel.h"
 #include "ui/status_bar.h"
 #include "ui/toast.h"
 #include "ui/shortcuts.h"
@@ -64,22 +66,26 @@ namespace ui {
 
         const char* pageTitle(NavItem item) {
             switch (item) {
-                case NAV_OVERVIEW:  return tr(K_PAGE_OVERVIEW);
-                case NAV_TASKS:     return tr(K_PAGE_TASKS);
-                case NAV_ANALYTICS: return tr(K_PAGE_ANALYTICS);
-                case NAV_BENCHMARK: return tr(K_PAGE_BENCHMARK);
-                case NAV_HELP:      return tr(K_PAGE_HELP);
+                case NAV_OVERVIEW:     return tr(K_PAGE_OVERVIEW);
+                case NAV_TASKS:        return tr(K_PAGE_TASKS);
+                case NAV_ANALYTICS:    return tr(K_PAGE_ANALYTICS);
+                case NAV_BENCHMARK:    return tr(K_PAGE_BENCHMARK);
+                case NAV_HELP:         return tr(K_PAGE_HELP);
+                case NAV_HISTORY:      return "History";
+                case NAV_PRODUCTIVITY: return "Productivity";
             }
             return tr(K_PAGE_WORKSPACE);
         }
 
         const char* pageSubtitle(NavItem item) {
             switch (item) {
-                case NAV_OVERVIEW:  return tr(K_SUB_OVERVIEW);
-                case NAV_TASKS:     return tr(K_SUB_TASKS);
-                case NAV_ANALYTICS: return tr(K_SUB_ANALYTICS);
-                case NAV_BENCHMARK: return tr(K_SUB_BENCHMARK);
-                case NAV_HELP:      return tr(K_SUB_HELP);
+                case NAV_OVERVIEW:     return tr(K_SUB_OVERVIEW);
+                case NAV_TASKS:        return tr(K_SUB_TASKS);
+                case NAV_ANALYTICS:    return tr(K_SUB_ANALYTICS);
+                case NAV_BENCHMARK:    return tr(K_SUB_BENCHMARK);
+                case NAV_HELP:         return tr(K_SUB_HELP);
+                case NAV_HISTORY:      return "Audit trail of every store mutation.";
+                case NAV_PRODUCTIVITY: return "Levels, badges, and streaks driven by your activity.";
             }
             return "";
         }
@@ -99,6 +105,19 @@ namespace ui {
 
         void drawNavIcon(ImDrawList* dl, ImVec2 centre, NavItem item, ImU32 color) {
             switch (item) {
+                case NAV_HISTORY:
+                    dl->AddCircle(ImVec2(centre.x, centre.y), 7.0f, color, 0, 1.6f);
+                    dl->AddLine(ImVec2(centre.x, centre.y),
+                                ImVec2(centre.x, centre.y - 4.0f), color, 1.6f);
+                    dl->AddLine(ImVec2(centre.x, centre.y),
+                                ImVec2(centre.x + 4.0f, centre.y), color, 1.6f);
+                    break;
+                case NAV_PRODUCTIVITY:
+                    dl->AddTriangleFilled(ImVec2(centre.x,        centre.y - 7.0f),
+                                          ImVec2(centre.x + 6.0f, centre.y + 4.0f),
+                                          ImVec2(centre.x - 6.0f, centre.y + 4.0f),
+                                          color);
+                    break;
                 case NAV_OVERVIEW:
                     dl->AddRect(ImVec2(centre.x - 6.0f, centre.y - 6.0f),
                                 ImVec2(centre.x + 6.0f, centre.y + 6.0f),
@@ -200,11 +219,13 @@ namespace ui {
 
             struct NavDef { NavItem item; const char* label; };
             const NavDef navItems[] = {
-                { NAV_OVERVIEW,  tr(K_NAV_OVERVIEW)  },
-                { NAV_TASKS,     tr(K_NAV_TASKS)     },
-                { NAV_ANALYTICS, tr(K_NAV_ANALYTICS) },
-                { NAV_BENCHMARK, tr(K_NAV_BENCHMARK) },
-                { NAV_HELP,      tr(K_NAV_HELP)      }
+                { NAV_OVERVIEW,     tr(K_NAV_OVERVIEW)  },
+                { NAV_TASKS,        tr(K_NAV_TASKS)     },
+                { NAV_ANALYTICS,    tr(K_NAV_ANALYTICS) },
+                { NAV_PRODUCTIVITY, "Productivity"      },
+                { NAV_HISTORY,      "History"           },
+                { NAV_BENCHMARK,    tr(K_NAV_BENCHMARK) },
+                { NAV_HELP,         tr(K_NAV_HELP)      }
             };
             const int navItemCount = static_cast<int>(IM_ARRAYSIZE(navItems));
 
@@ -621,11 +642,12 @@ namespace ui {
                     ImGui::PushTextWrapPos(max.x - 8.0f);
                     ImGui::SetCursorScreenPos(ImVec2(min.x + 44.0f, min.y + 6.0f));
                     ImGui::TextColored(ColTextSecondary, "%s", task.title.c_str());
+                    std::string updatedAt = logic::formatDate(task.updatedAt);
                     ImGui::SetCursorScreenPos(ImVec2(min.x + 44.0f, min.y + 28.0f));
                     ImGui::TextColored(ColTextFaint, "%s",
-                                       logic::formatDate(task.updatedAt).empty()
+                                       updatedAt.empty()
                                            ? tr(K_OV_UPDATED_RECENTLY)
-                                           : logic::formatDate(task.updatedAt).c_str());
+                                           : updatedAt.c_str());
                     ImGui::PopTextWrapPos();
                     ImGui::Dummy(ImVec2(1.0f, 64.0f));
                 }
@@ -716,6 +738,12 @@ namespace ui {
                     break;
                 case NAV_HELP:
                     renderHelpPanel(store, uiState);
+                    break;
+                case NAV_HISTORY:
+                    renderHistoryPanel(store, uiState);
+                    break;
+                case NAV_PRODUCTIVITY:
+                    renderProductivityPanel(store, uiState);
                     break;
             }
 

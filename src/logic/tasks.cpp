@@ -1,7 +1,10 @@
 #include "logic/tasks.h"
 #include "logic/recursion.h"
 #include "logic/dates.h"
+#include "logic/history.h"
+#include "logic/productivity.h"
 #include "data/store.h"
+#include "data/date.h"
 
 namespace logic {
 
@@ -59,6 +62,13 @@ namespace logic {
         t.createdAt      = today;
         t.updatedAt      = today;
         data::addTaskToStore(store, t);
+
+        recordTaskCreated(store.productivity);
+        if (t.status == data::STATUS_DONE) {
+            recordTaskCompleted(store.productivity, data::formatDate(today));
+        }
+        pushHistory(store, data::HIST_CREATE, t.id,
+                    "Created \"" + t.title + "\"");
         return t.id;
     }
 
@@ -78,10 +88,30 @@ namespace logic {
         if (!outResult.ok) {
             return false;
         }
+        data::Status   prevStatus = existing->status;
+        std::string    prevTitle  = existing->title;
         data::Task copy = updated;
         copy.createdAt  = existing->createdAt;
         copy.updatedAt  = logic::today();
-        return data::updateTaskInStore(store, copy);
+        if (!data::updateTaskInStore(store, copy)) {
+            return false;
+        }
+
+        recordTaskEdited(store.productivity);
+        if (prevStatus != copy.status) {
+            pushHistory(store, data::HIST_STATUS_CHANGE, copy.id,
+                        "Status: \"" + copy.title + "\" -> "
+                            + std::to_string(static_cast<int>(copy.status)));
+            if (copy.status == data::STATUS_DONE &&
+                prevStatus != data::STATUS_DONE) {
+                recordTaskCompleted(store.productivity,
+                                    data::formatDate(logic::today()));
+            }
+        } else {
+            pushHistory(store, data::HIST_EDIT, copy.id,
+                        "Edited \"" + copy.title + "\"");
+        }
+        return true;
     }
 
     // Cascade delete: gather every descendant id first, then remove. We
@@ -92,6 +122,7 @@ namespace logic {
         if (root == nullptr) {
             return 0;
         }
+        std::string rootTitle = root->title;
         std::vector<int> victims;
         victims.push_back(rootId);
         collectDescendantIds(store, rootId, victims);
@@ -100,6 +131,11 @@ namespace logic {
             if (data::removeTaskFromStore(store, victimId)) {
                 removed += 1;
             }
+        }
+        if (removed > 0) {
+            pushHistory(store, data::HIST_DELETE, rootId,
+                        "Deleted \"" + rootTitle + "\" ("
+                            + std::to_string(removed) + " tasks)");
         }
         return removed;
     }
@@ -118,6 +154,39 @@ namespace logic {
         store          = snapshot;
         store.filePath = keepPath;
         store.dirty    = true;
+    }
+
+    bool applyDecision(data::TaskStore& store,
+                       int taskId,
+                       int decisionIndex,
+                       int optionIndex) {
+        data::Task* task = data::findTaskInStore(store, taskId);
+        if (task == nullptr) {
+            return false;
+        }
+        if (decisionIndex < 0 ||
+            decisionIndex >= static_cast<int>(task->decisions.size())) {
+            return false;
+        }
+        data::Decision& dec = task->decisions[decisionIndex];
+        if (optionIndex < 0 ||
+            optionIndex >= static_cast<int>(dec.options.size())) {
+            return false;
+        }
+        dec.chosenIndex   = optionIndex;
+        data::Status prev = task->status;
+        task->status      = dec.options[optionIndex].effect;
+        task->updatedAt   = logic::today();
+        store.dirty       = true;
+
+        std::string summary = "Decision \"" + dec.question + "\" -> \""
+            + dec.options[optionIndex].text + "\"";
+        pushHistory(store, data::HIST_DECISION, taskId, summary);
+        if (prev != task->status && task->status == data::STATUS_DONE) {
+            recordTaskCompleted(store.productivity,
+                                data::formatDate(logic::today()));
+        }
+        return true;
     }
 
 }

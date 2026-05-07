@@ -11,6 +11,11 @@ namespace data {
     // Separates the header block from records, and one record from the
     // next. Chosen so the file remains diff-friendly in plain text tools.
     static const char* RECORD_SEP  = "---";
+    // Section markers introduced after the original task list. Older
+    // files without these markers still load (history/productivity stay
+    // empty), keeping backward compatibility intact.
+    static const char* SECTION_HISTORY      = "===HISTORY===";
+    static const char* SECTION_PRODUCTIVITY = "===PRODUCTIVITY===";
 
     static std::string trimRight(const std::string& s) {
         std::size_t end = s.size();
@@ -94,16 +99,59 @@ namespace data {
             ss << "actualMinutes="     << t.actualMinutes    << "\n";
             ss << "createdAt="         << formatDate(t.createdAt) << "\n";
             ss << "updatedAt="         << formatDate(t.updatedAt) << "\n";
+            for (const Decision& dec : t.decisions) {
+                ss << "decision_question=" << escapeValue(dec.question) << "\n";
+                ss << "decision_chosen="   << dec.chosenIndex << "\n";
+                for (const DecisionOption& opt : dec.options) {
+                    ss << "decision_option=" << static_cast<int>(opt.effect)
+                       << "|" << escapeValue(opt.text) << "\n";
+                }
+                ss << "decision_end=" << "\n";
+            }
             ss << RECORD_SEP << "\n";
+        }
+
+        ss << SECTION_HISTORY << "\n";
+        ss << "nextHistoryId=" << store.nextHistoryId << "\n";
+        ss << RECORD_SEP << "\n";
+        for (const HistoryEntry& h : store.history) {
+            ss << "hid="      << h.id                            << "\n";
+            ss << "htime="    << escapeValue(h.timestamp)        << "\n";
+            ss << "haction="  << static_cast<int>(h.action)      << "\n";
+            ss << "htask="    << h.taskId                        << "\n";
+            ss << "hsummary=" << escapeValue(h.summary)          << "\n";
+            ss << RECORD_SEP << "\n";
+        }
+
+        ss << SECTION_PRODUCTIVITY << "\n";
+        ss << "xp="           << store.productivity.xp           << "\n";
+        ss << "totalDone="    << store.productivity.totalDone    << "\n";
+        ss << "totalCreated=" << store.productivity.totalCreated << "\n";
+        ss << "totalEdited="  << store.productivity.totalEdited  << "\n";
+        for (const std::string& b : store.productivity.earnedBadges) {
+            ss << "badge=" << escapeValue(b) << "\n";
+        }
+        for (const std::string& d : store.productivity.completionDates) {
+            ss << "completion=" << escapeValue(d) << "\n";
         }
         out = ss.str();
         return true;
     }
 
+    static Status clampStatus(int s) {
+        if (s < STATUS_TODO)    s = STATUS_TODO;
+        if (s > STATUS_BLOCKED) s = STATUS_BLOCKED;
+        return static_cast<Status>(s);
+    }
+
     // Apply one parsed key=value pair to the in-progress task. Unknown
     // keys are ignored on purpose so future versions can add fields
-    // without breaking older builds.
+    // without breaking older builds. `pendingDecision` is the decision
+    // record currently being assembled; the caller flushes it on
+    // `decision_end=`.
     static void applyKeyValue(Task& t,
+                              Decision& pendingDecision,
+                              bool& hasPendingDecision,
                               const std::string& key,
                               const std::string& value) {
         if (key == "id") {
@@ -122,10 +170,7 @@ namespace data {
             if (p > PRIORITY_CRITICAL) p = PRIORITY_CRITICAL;
             t.priority = static_cast<Priority>(p);
         } else if (key == "status") {
-            int s = std::atoi(value.c_str());
-            if (s < STATUS_TODO) s = STATUS_TODO;
-            if (s > STATUS_BLOCKED) s = STATUS_BLOCKED;
-            t.status = static_cast<Status>(s);
+            t.status = clampStatus(std::atoi(value.c_str()));
         } else if (key == "deadline") {
             Date d{};
             if (parseDate(value, d)) {
@@ -145,6 +190,69 @@ namespace data {
             if (parseDate(value, d)) {
                 t.updatedAt = d;
             }
+        } else if (key == "decision_question") {
+            pendingDecision = Decision{};
+            pendingDecision.question     = unescapeValue(value);
+            pendingDecision.chosenIndex  = -1;
+            hasPendingDecision           = true;
+        } else if (key == "decision_chosen") {
+            if (hasPendingDecision) {
+                pendingDecision.chosenIndex = std::atoi(value.c_str());
+            }
+        } else if (key == "decision_option") {
+            if (hasPendingDecision) {
+                std::size_t pipe = value.find('|');
+                if (pipe != std::string::npos) {
+                    DecisionOption opt;
+                    opt.effect = clampStatus(
+                        std::atoi(value.substr(0, pipe).c_str()));
+                    opt.text   = unescapeValue(value.substr(pipe + 1));
+                    pendingDecision.options.push_back(opt);
+                }
+            }
+        } else if (key == "decision_end") {
+            if (hasPendingDecision) {
+                t.decisions.push_back(pendingDecision);
+                pendingDecision    = Decision{};
+                hasPendingDecision = false;
+            }
+        }
+    }
+
+    static void applyHistoryKeyValue(HistoryEntry& h,
+                                     const std::string& key,
+                                     const std::string& value) {
+        if (key == "hid") {
+            h.id = std::atoi(value.c_str());
+        } else if (key == "htime") {
+            h.timestamp = unescapeValue(value);
+        } else if (key == "haction") {
+            int a = std::atoi(value.c_str());
+            if (a < HIST_CREATE)        a = HIST_CREATE;
+            if (a > HIST_DECISION)      a = HIST_DECISION;
+            h.action = static_cast<HistoryAction>(a);
+        } else if (key == "htask") {
+            h.taskId = std::atoi(value.c_str());
+        } else if (key == "hsummary") {
+            h.summary = unescapeValue(value);
+        }
+    }
+
+    static void applyProductivityKeyValue(ProductivityState& p,
+                                          const std::string& key,
+                                          const std::string& value) {
+        if (key == "xp") {
+            p.xp = std::atoi(value.c_str());
+        } else if (key == "totalDone") {
+            p.totalDone = std::atoi(value.c_str());
+        } else if (key == "totalCreated") {
+            p.totalCreated = std::atoi(value.c_str());
+        } else if (key == "totalEdited") {
+            p.totalEdited = std::atoi(value.c_str());
+        } else if (key == "badge") {
+            p.earnedBadges.push_back(unescapeValue(value));
+        } else if (key == "completion") {
+            p.completionDates.push_back(unescapeValue(value));
         }
     }
 
@@ -165,21 +273,35 @@ namespace data {
         return t;
     }
 
-    // Streaming parser. Walks the file line by line maintaining a tiny
-    // state machine: header → first separator → record body → separator
-    // → next record. Empty lines and `#` comments are tolerated anywhere
-    // so the format stays friendly to manual edits.
+    enum ParseSection {
+        SECT_HEADER,
+        SECT_TASKS,
+        SECT_HISTORY_HEADER,
+        SECT_HISTORY,
+        SECT_PRODUCTIVITY
+    };
+
+    // Streaming parser. Walks the file line by line maintaining a small
+    // state machine across sections: header -> tasks -> history header
+    // -> history records -> productivity. Empty lines and `#` comments
+    // are tolerated anywhere so the format stays friendly to manual
+    // edits.
     bool storeFromText(const std::string& text,
                        TaskStore& store,
                        std::string& errorMessage) {
         TaskStore tmp = createEmptyStore();
         std::istringstream ss(text);
         std::string line;
-        bool sawMagic        = false;
-        bool inHeader        = true;
-        bool recordOpen      = false;
-        Task current         = defaultTask();
-        int  lineNo          = 0;
+
+        bool sawMagic         = false;
+        ParseSection section  = SECT_HEADER;
+        Task currentTask      = defaultTask();
+        bool taskOpen         = false;
+        Decision pendingDec{};
+        bool hasPendingDec    = false;
+        HistoryEntry currentHist{};
+        bool histOpen         = false;
+        int  lineNo           = 0;
 
         while (std::getline(ss, line)) {
             lineNo += 1;
@@ -199,35 +321,83 @@ namespace data {
             if (line.rfind('#', 0) == 0) {
                 continue;
             }
+
+            if (line == SECTION_HISTORY) {
+                if (taskOpen && currentTask.id > 0) {
+                    tmp.tasks.push_back(currentTask);
+                }
+                taskOpen        = false;
+                hasPendingDec   = false;
+                section         = SECT_HISTORY_HEADER;
+                continue;
+            }
+            if (line == SECTION_PRODUCTIVITY) {
+                section = SECT_PRODUCTIVITY;
+                continue;
+            }
+
             if (line == RECORD_SEP) {
-                if (inHeader) {
-                    inHeader   = false;
-                    recordOpen = true;
-                    current    = defaultTask();
-                } else if (recordOpen) {
-                    // Only commit records that actually got an id —
-                    // otherwise an empty trailing record block would
-                    // create a phantom task.
-                    if (current.id > 0) {
-                        tmp.tasks.push_back(current);
+                if (section == SECT_HEADER) {
+                    section      = SECT_TASKS;
+                    taskOpen     = true;
+                    currentTask  = defaultTask();
+                } else if (section == SECT_TASKS) {
+                    if (taskOpen && currentTask.id > 0) {
+                        tmp.tasks.push_back(currentTask);
                     }
-                    current    = defaultTask();
-                    recordOpen = true;
+                    currentTask = defaultTask();
+                    taskOpen    = true;
+                } else if (section == SECT_HISTORY_HEADER) {
+                    section     = SECT_HISTORY;
+                    currentHist = HistoryEntry{};
+                    histOpen    = true;
+                } else if (section == SECT_HISTORY) {
+                    if (histOpen && currentHist.id > 0) {
+                        tmp.history.push_back(currentHist);
+                    }
+                    currentHist = HistoryEntry{};
+                    histOpen    = true;
                 }
                 continue;
             }
+
             std::string key;
             std::string value;
             if (!splitKeyValue(line, key, value)) {
                 continue;
             }
-            if (inHeader) {
-                if (key == "nextId") {
-                    tmp.nextId = std::atoi(value.c_str());
-                }
-            } else {
-                applyKeyValue(current, key, value);
+
+            switch (section) {
+                case SECT_HEADER:
+                    if (key == "nextId") {
+                        tmp.nextId = std::atoi(value.c_str());
+                    }
+                    break;
+                case SECT_TASKS:
+                    applyKeyValue(currentTask, pendingDec,
+                                  hasPendingDec, key, value);
+                    break;
+                case SECT_HISTORY_HEADER:
+                    if (key == "nextHistoryId") {
+                        tmp.nextHistoryId = std::atoi(value.c_str());
+                    }
+                    break;
+                case SECT_HISTORY:
+                    applyHistoryKeyValue(currentHist, key, value);
+                    break;
+                case SECT_PRODUCTIVITY:
+                    applyProductivityKeyValue(tmp.productivity, key, value);
+                    break;
             }
+        }
+
+        // Flush any unterminated trailing record. Common when the file
+        // does not end with a record separator after the last task.
+        if (section == SECT_TASKS && taskOpen && currentTask.id > 0) {
+            tmp.tasks.push_back(currentTask);
+        }
+        if (section == SECT_HISTORY && histOpen && currentHist.id > 0) {
+            tmp.history.push_back(currentHist);
         }
 
         // If the header didn't supply nextId (or it was bogus), recover
@@ -241,6 +411,15 @@ namespace data {
                 }
             }
             tmp.nextId = maxId + 1;
+        }
+        if (tmp.nextHistoryId < 1) {
+            int maxHid = 0;
+            for (const HistoryEntry& h : tmp.history) {
+                if (h.id > maxHid) {
+                    maxHid = h.id;
+                }
+            }
+            tmp.nextHistoryId = maxHid + 1;
         }
 
         store = tmp;

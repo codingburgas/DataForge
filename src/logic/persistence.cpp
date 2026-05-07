@@ -1,4 +1,5 @@
 #include "logic/persistence.h"
+#include "logic/history.h"
 #include "data/persistence.h"
 
 namespace logic {
@@ -13,7 +14,12 @@ namespace logic {
             errorMessage = "No file path provided.";
             return false;
         }
-        return data::loadStoreFromFile(store, path, errorMessage);
+        if (!data::loadStoreFromFile(store, path, errorMessage)) {
+            return false;
+        }
+        pushHistory(store, data::HIST_LOAD, -1, "Loaded " + path);
+        store.dirty = false;
+        return true;
     }
 
     bool saveStore(data::TaskStore& store,
@@ -23,6 +29,7 @@ namespace logic {
             errorMessage = "No file path provided.";
             return false;
         }
+        pushHistory(store, data::HIST_SAVE, -1, "Saved " + path);
         return data::saveStoreToFile(store, path, errorMessage);
     }
 
@@ -35,6 +42,7 @@ namespace logic {
             errorMessage = "Store has no associated file path; use Save As.";
             return false;
         }
+        pushHistory(store, data::HIST_SAVE, -1, "Saved " + store.filePath);
         return data::saveStoreToFile(store, store.filePath, errorMessage);
     }
 

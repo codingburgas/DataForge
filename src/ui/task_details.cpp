@@ -2,6 +2,7 @@
 #include "ui/theme.h"
 #include "ui/i18n.h"
 #include "ui/dialogs.h"
+#include "ui/toast.h"
 #include "logic/recursion.h"
 #include "logic/tasks.h"
 #include "logic/dates.h"
@@ -126,6 +127,78 @@ namespace ui {
         ImGui::TextColored(ColTextFaint, tr(K_DT_CREATED_FMT), created.empty() ? "-" : created.c_str());
         ImGui::SameLine(0, 18.0f);
         ImGui::TextColored(ColTextFaint, tr(K_DT_UPDATED_FMT), updated.empty() ? "-" : updated.c_str());
+
+        if (!task->decisions.empty()) {
+            ImGui::Dummy(ImVec2(1.0f, 14.0f));
+            ImGui::Separator();
+            ImGui::Dummy(ImVec2(1.0f, 10.0f));
+            ImGui::PushFont(fontHeading());
+            ImGui::TextColored(ColTextPrimary, "Decisions");
+            ImGui::PopFont();
+            ImGui::TextColored(ColTextFaint,
+                               "Pick an option to set the task status.");
+            ImGui::Dummy(ImVec2(1.0f, 8.0f));
+
+            for (std::size_t di = 0; di < task->decisions.size(); ++di) {
+                const data::Decision& dec = task->decisions[di];
+                ImGui::PushID(static_cast<int>(di));
+
+                ImVec2 min = ImGui::GetCursorScreenPos();
+                float width = ImGui::GetContentRegionAvail().x;
+                int   optCount = static_cast<int>(dec.options.size());
+                float height = 56.0f + optCount * 36.0f;
+                ImVec2 max = ImVec2(min.x + width, min.y + height);
+                ImDrawList* dl = ImGui::GetWindowDrawList();
+                dl->AddRectFilled(min, max, cardBgU32(), 14.0f);
+                dl->AddRect(min, max, cardBorderU32(), 14.0f);
+
+                ImGui::SetCursorScreenPos(ImVec2(min.x + 14.0f, min.y + 12.0f));
+                ImGui::PushFont(fontUiSemibold());
+                ImGui::TextColored(ColTextPrimary, "%s",
+                                   dec.question.empty()
+                                       ? "(no question)"
+                                       : dec.question.c_str());
+                ImGui::PopFont();
+
+                for (int oi = 0; oi < optCount; ++oi) {
+                    const data::DecisionOption& opt = dec.options[oi];
+                    ImGui::SetCursorScreenPos(
+                        ImVec2(min.x + 14.0f,
+                               min.y + 40.0f + oi * 32.0f));
+                    char btnId[48];
+                    std::snprintf(btnId, sizeof(btnId), "decopt_%zu_%d", di, oi);
+                    bool isChosen = (dec.chosenIndex == oi);
+                    if (isChosen) {
+                        ImGui::PushStyleColor(ImGuiCol_Button,         HEX(0xEEE9FF));
+                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered,  HEX(0xE0D7FF));
+                        ImGui::PushStyleColor(ImGuiCol_ButtonActive,   HEX(0xCBB9FF));
+                        ImGui::PushStyleColor(ImGuiCol_Text,           HEX(0x5B21B6));
+                    } else {
+                        ImGui::PushStyleColor(ImGuiCol_Button,         ColBgSubtle);
+                        ImGui::PushStyleColor(ImGuiCol_ButtonHovered,  ColBgHover);
+                        ImGui::PushStyleColor(ImGuiCol_ButtonActive,   ColBgActive);
+                        ImGui::PushStyleColor(ImGuiCol_Text,           ColTextSecondary);
+                    }
+                    char label[160];
+                    std::snprintf(label, sizeof(label), "%s%s -> %s##%s",
+                                  isChosen ? "(chosen) " : "",
+                                  opt.text.c_str(),
+                                  statusLabel(opt.effect),
+                                  btnId);
+                    if (ImGui::Button(label, ImVec2(width - 28.0f, 28.0f))) {
+                        if (logic::applyDecision(store, task->id,
+                                                 static_cast<int>(di), oi)) {
+                            pushToast(uiState, "Decision applied.");
+                        }
+                    }
+                    ImGui::PopStyleColor(4);
+                }
+
+                ImGui::SetCursorScreenPos(min);
+                ImGui::Dummy(ImVec2(width, height + 10.0f));
+                ImGui::PopID();
+            }
+        }
 
         ImGui::Dummy(ImVec2(1.0f, 16.0f));
         ImGui::Separator();

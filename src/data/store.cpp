@@ -7,9 +7,12 @@ namespace data {
     TaskStore createEmptyStore() {
         TaskStore store;
         store.tasks.clear();
-        store.nextId  = 1;
+        store.nextId        = 1;
         store.filePath.clear();
-        store.dirty   = false;
+        store.dirty         = false;
+        store.history.clear();
+        store.nextHistoryId = 1;
+        store.productivity  = ProductivityState{};
         return store;
     }
 

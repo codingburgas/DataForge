@@ -204,11 +204,12 @@ namespace ui {
                 ImGui::PushFont(fontUiSemibold());
                 ImGui::TextColored(ColTextPrimary, "%s", root->title.c_str());
                 ImGui::PopFont();
+                int totalEstMins = logic::calculateTotalEstimatedMinutes(store, root->id);
                 ImGui::SetCursorScreenPos(ImVec2(min.x + 64.0f, min.y + 42.0f));
                 ImGui::TextColored(ColTextFaint,
                                    tr(K_ST_PROJECT_DETAIL_FMT),
-                                   logic::calculateTotalEstimatedMinutes(store, root->id) / 60,
-                                   logic::calculateTotalEstimatedMinutes(store, root->id) % 60,
+                                   totalEstMins / 60,
+                                   totalEstMins % 60,
                                    logic::countDescendants(store, root->id),
                                    logic::maxSubtreeDepth(store, root->id));
                 ImGui::SetCursorScreenPos(ImVec2(max.x - 74.0f, min.y + 30.0f));
