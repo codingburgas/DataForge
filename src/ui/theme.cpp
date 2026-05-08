@@ -308,8 +308,8 @@ namespace ui {
         ImGuiStyle& s = ImGui::GetStyle();
 
         s.WindowRounding    = 0.0f;
-        s.ChildRounding     = 18.0f;
-        s.FrameRounding     = 10.0f;
+        s.ChildRounding     = 20.0f;
+        s.FrameRounding     = 12.0f;
         s.PopupRounding     = 18.0f;
         s.ScrollbarRounding = 99.0f;
         s.GrabRounding      = 99.0f;
@@ -323,10 +323,12 @@ namespace ui {
         s.FramePadding            = ImVec2(12.0f, 9.0f);
         s.ItemSpacing             = ImVec2(10.0f, 8.0f);
         s.ItemInnerSpacing        = ImVec2(8.0f, 6.0f);
+        s.CellPadding             = ImVec2(12.0f, 8.0f);
         s.IndentSpacing           = 18.0f;
         s.ScrollbarSize           = 8.0f;
         s.GrabMinSize             = 10.0f;
         s.SeparatorTextBorderSize = 1.0f;
+        s.SelectableTextAlign     = ImVec2(0.0f, 0.5f);
 
         ImVec4* c = s.Colors;
 
@@ -505,29 +507,55 @@ namespace ui {
     }
 
     BadgeStyle statusBadgeStyle(data::Status s) {
+        const bool dark = isDarkTheme();
         switch (s) {
             case data::STATUS_TODO:
-                return { tr(K_ST_TODO),        HEX(0xF1F5F9), HEX(0x64748B), HEX(0x94A3B8) };
+                return { tr(K_ST_TODO),
+                         dark ? HEX(0x263244) : HEX(0xF1F5F9),
+                         dark ? HEX(0xCBD5E1) : HEX(0x64748B),
+                         dark ? HEX(0x94A3B8) : HEX(0x94A3B8) };
             case data::STATUS_IN_PROGRESS:
-                return { tr(K_ST_IN_PROGRESS), HEX(0xFFFBEB), HEX(0xB45309), HEX(0xD97706) };
+                return { tr(K_ST_IN_PROGRESS),
+                         dark ? HEX(0x3A2A13) : HEX(0xFFFBEB),
+                         dark ? HEX(0xFBBF24) : HEX(0xB45309),
+                         HEX(0xD97706) };
             case data::STATUS_DONE:
-                return { tr(K_ST_DONE),        HEX(0xECFDF5), HEX(0x065F46), HEX(0x059669) };
+                return { tr(K_ST_DONE),
+                         dark ? HEX(0x12382B) : HEX(0xECFDF5),
+                         dark ? HEX(0x6EE7B7) : HEX(0x065F46),
+                         HEX(0x059669) };
             case data::STATUS_BLOCKED:
-                return { tr(K_ST_BLOCKED),     HEX(0xFEF2F2), HEX(0x991B1B), HEX(0xDC2626) };
+                return { tr(K_ST_BLOCKED),
+                         dark ? HEX(0x421B1B) : HEX(0xFEF2F2),
+                         dark ? HEX(0xFCA5A5) : HEX(0x991B1B),
+                         HEX(0xDC2626) };
         }
         return { "?", HEX(0xF1F5F9), HEX(0x64748B), HEX(0x94A3B8) };
     }
 
     BadgeStyle priorityBadgeStyle(data::Priority p) {
+        const bool dark = isDarkTheme();
         switch (p) {
             case data::PRIORITY_LOW:
-                return { tr(K_PRI_LOW),      HEX(0xECFDF5), HEX(0x059669), HEX(0x059669) };
+                return { tr(K_PRI_LOW),
+                         dark ? HEX(0x12382B) : HEX(0xECFDF5),
+                         dark ? HEX(0x6EE7B7) : HEX(0x059669),
+                         HEX(0x059669) };
             case data::PRIORITY_MEDIUM:
-                return { tr(K_PRI_MEDIUM),   HEX(0xEFF6FF), HEX(0x2563EB), HEX(0x2563EB) };
+                return { tr(K_PRI_MEDIUM),
+                         dark ? HEX(0x172E57) : HEX(0xEFF6FF),
+                         dark ? HEX(0x93C5FD) : HEX(0x2563EB),
+                         HEX(0x2563EB) };
             case data::PRIORITY_HIGH:
-                return { tr(K_PRI_HIGH),     HEX(0xFFF7ED), HEX(0xEA580C), HEX(0xEA580C) };
+                return { tr(K_PRI_HIGH),
+                         dark ? HEX(0x3F2412) : HEX(0xFFF7ED),
+                         dark ? HEX(0xFDBA74) : HEX(0xEA580C),
+                         HEX(0xEA580C) };
             case data::PRIORITY_CRITICAL:
-                return { tr(K_PRI_CRITICAL), HEX(0xFEF2F2), HEX(0xDC2626), HEX(0xDC2626) };
+                return { tr(K_PRI_CRITICAL),
+                         dark ? HEX(0x421B1B) : HEX(0xFEF2F2),
+                         dark ? HEX(0xFCA5A5) : HEX(0xDC2626),
+                         HEX(0xDC2626) };
         }
         return { "?", HEX(0xF1F5F9), HEX(0x64748B), HEX(0x94A3B8) };
     }
@@ -626,6 +654,20 @@ namespace ui {
                            pos.y + (size.y - textSz.y) * 0.5f - 1.0f),
                     IM_COL32(255, 255, 255, 255), label);
         return pressed;
+    }
+
+    float animateHover(const char* id, bool hovered, float duration) {
+        ImGuiStorage* s = ImGui::GetStateStorage();
+        ImGuiID key = ImGui::GetID(id);
+        float t = s->GetFloat(key, 0.0f);
+        float dt = ImGui::GetIO().DeltaTime;
+        if (duration <= 0.0f) duration = 0.001f;
+        float dir = hovered ? 1.0f : -1.0f;
+        t += dir * (dt / duration);
+        if (t < 0.0f) t = 0.0f;
+        if (t > 1.0f) t = 1.0f;
+        s->SetFloat(key, t);
+        return 1.0f - (1.0f - t) * (1.0f - t);
     }
 
     void renderProgressRing(ImVec2 centre, float radius, float thickness,

@@ -115,4 +115,6 @@ namespace ui {
                             float pct, ImU32 fgCol,
                             ImU32 bgCol = IM_COL32(226, 232, 240, 255));
 
+    float animateHover(const char* id, bool hovered, float duration = 0.15f);
+
 }

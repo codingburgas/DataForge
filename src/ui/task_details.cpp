@@ -17,7 +17,7 @@ namespace ui {
             ImVec2 min = ImGui::GetCursorScreenPos();
             ImVec2 max = ImVec2(min.x + width, min.y + 68.0f);
             ImDrawList* dl = ImGui::GetWindowDrawList();
-            dl->AddRectFilled(min, max, IM_COL32(249, 250, 252, 255), 16.0f);
+            dl->AddRectFilled(min, max, ImGui::ColorConvertFloat4ToU32(ColBgSubtle), 16.0f);
             dl->AddRect(min, max, cardBorderU32(), 16.0f);
             ImGui::SetCursorScreenPos(ImVec2(min.x + 14.0f, min.y + 14.0f));
             ImGui::TextColored(ColTextFaint, "%s", label);
@@ -72,7 +72,7 @@ namespace ui {
         ImVec2 pctSz = ImGui::CalcTextSize(pct);
         dl->AddText(fontUiSemibold(), fontUiSemibold()->LegacySize,
                     ImVec2(heroMin.x + 46.0f - pctSz.x * 0.5f, heroMin.y + 48.0f),
-                    IM_COL32(22, 32, 51, 255), pct);
+                    ImGui::ColorConvertFloat4ToU32(ColTextPrimary), pct);
 
         ImGui::SetCursorScreenPos(ImVec2(heroMin.x + 90.0f, heroMin.y + 18.0f));
         ImGui::TextColored(ColTextFaint, "#%d", task->id);

@@ -40,7 +40,7 @@ namespace ui {
 
             ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 14.0f);
             ImGui::PushStyleColor(ImGuiCol_FrameBg, ColBgSubtle);
-            ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, HEX(0xF4F7FB));
+            ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, isDarkTheme() ? HEX(0x232B45) : HEX(0xF4F7FB));
             ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ColBgActive);
             ImGui::PushStyleColor(ImGuiCol_Border, ColBorder);
 
@@ -107,13 +107,20 @@ namespace ui {
 
             UrgencyColor pc = colorForPriority(task.priority);
             ImU32 accent = urgencyToImU32(pc);
+            char id[32];
+            std::snprintf(id, sizeof(id), "##taskCard%d", task.id);
+            bool hovered = ImGui::IsMouseHoveringRect(min, max);
+            float hoverT = animateHover(id, hovered, 0.18f);
 
             drawSoftShadow(dl, min, max, 18.0f,
-                           selected ? IM_COL32(124, 58, 237, 28)
-                                    : IM_COL32(15, 23, 42, 12));
+                           selected ? IM_COL32(124, 58, 237, 34)
+                                    : hovered ? IM_COL32(15, 23, 42, 20)
+                                              : IM_COL32(15, 23, 42, 12),
+                           ImVec2(0.0f, 6.0f + 2.0f * hoverT));
             dl->AddRectFilled(min, max, cardBgU32(), 18.0f);
             dl->AddRect(min, max,
-                        selected ? IM_COL32(124, 58, 237, 255)
+                        selected ? ImGui::ColorConvertFloat4ToU32(ColAccent)
+                                 : hovered ? ImGui::ColorConvertFloat4ToU32(ColBorderStrong)
                                  : cardBorderU32(),
                         18.0f, 0, selected ? 1.8f : 1.2f);
             dl->AddRectFilled(ImVec2(min.x + 18.0f, min.y + 20.0f),
@@ -164,8 +171,6 @@ namespace ui {
             ImGui::TextColored(ColTextFaint, "%s", actual);
 
             ImGui::SetCursorScreenPos(min);
-            char id[32];
-            std::snprintf(id, sizeof(id), "##taskCard%d", task.id);
             if (ImGui::InvisibleButton(id, ImVec2(width, 132.0f))) {
                 uiState.selectedTaskId = task.id;
             }

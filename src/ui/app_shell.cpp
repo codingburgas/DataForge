@@ -103,6 +103,30 @@ namespace ui {
             return tr(K_GREETING_EVENING);
         }
 
+        ImU32 u32(ImVec4 color) {
+            return ImGui::ColorConvertFloat4ToU32(color);
+        }
+
+        void drawShellBackdrop(ImDrawList* dl, ImVec2 min, ImVec2 max) {
+            if (dl == nullptr) {
+                return;
+            }
+
+            ImU32 topLeft = u32(isDarkTheme() ? HEX(0x18233A) : HEX(0xF8FAFF));
+            ImU32 topRight = u32(isDarkTheme() ? HEX(0x111827) : HEX(0xFFF7ED));
+            ImU32 bottom = u32(ColBgBase);
+            dl->AddRectFilledMultiColor(min, max, topLeft, topRight, bottom, bottom);
+
+            ImU32 accentWash = isDarkTheme()
+                ? IM_COL32(124, 58, 237, 20)
+                : IM_COL32(124, 58, 237, 18);
+            ImU32 warmWash = isDarkTheme()
+                ? IM_COL32(249, 115, 22, 14)
+                : IM_COL32(249, 115, 22, 18);
+            dl->AddCircleFilled(ImVec2(max.x - 90.0f, min.y + 74.0f), 142.0f, accentWash, 64);
+            dl->AddCircleFilled(ImVec2(min.x + 180.0f, max.y - 34.0f), 120.0f, warmWash, 64);
+        }
+
         void drawNavIcon(ImDrawList* dl, ImVec2 centre, NavItem item, ImU32 color) {
             switch (item) {
                 case NAV_HISTORY:
@@ -231,41 +255,55 @@ namespace ui {
 
             ImGui::SetCursorPosY(84.0f);
             for (int i = 0; i < navItemCount; ++i) {
+                ImGui::SetCursorPosX(11.0f);
                 const NavDef& nav = navItems[i];
                 bool active = uiState.activeNavItem == nav.item;
                 ImVec2 btnPos = ImGui::GetCursorScreenPos();
-                float btnH = 40.0f;
+                float btnH = 44.0f;
                 float btnW = sidebarW - 22.0f;
                 ImVec2 btnEnd = ImVec2(btnPos.x + btnW, btnPos.y + btnH);
 
+                char id[32];
+                std::snprintf(id, sizeof(id), "##nav%d", i);
+                ImGui::SetCursorScreenPos(btnPos);
+                ImGui::InvisibleButton(id, ImVec2(btnW, btnH));
+                bool hovered = ImGui::IsItemHovered();
+                bool clicked = ImGui::IsItemClicked();
+                float anim = animateHover(id, hovered);
+
                 if (active) {
-                    dl->AddRectFilled(btnPos, btnEnd, IM_COL32(238, 233, 255, 255), 14.0f);
-                    dl->AddRectFilled(ImVec2(btnPos.x, btnPos.y + 8.0f),
-                                      ImVec2(btnPos.x + 3.0f, btnPos.y + btnH - 8.0f),
-                                      GradLeft, 4.0f);
-                } else if (ImGui::IsMouseHoveringRect(btnPos, btnEnd)) {
-                    dl->AddRectFilled(btnPos, btnEnd, IM_COL32(248, 250, 253, 255), 14.0f);
+                    drawSoftShadow(dl, btnPos, btnEnd, 12.0f,
+                                   IM_COL32(124, 58, 237, 60), ImVec2(0.0f, 4.0f));
+                    drawGradientRect(dl, btnPos, btnEnd, 12.0f, GradLeft, GradMid);
+                    dl->AddRectFilled(ImVec2(btnPos.x, btnPos.y + 6.0f),
+                                      ImVec2(btnPos.x + 4.0f, btnPos.y + btnH - 6.0f),
+                                      IM_COL32(255, 255, 255, 220), 99.0f);
+                } else if (anim > 0.001f) {
+                    int alpha = (int)(anim * 255.0f);
+                    ImU32 hoverBg = IM_COL32((int)(ColBgHover.x * 255), (int)(ColBgHover.y * 255),
+                                             (int)(ColBgHover.z * 255), alpha);
+                    dl->AddRectFilled(btnPos, btnEnd, hoverBg, 12.0f);
                 }
 
-                ImU32 iconCol = active ? IM_COL32(124, 58, 237, 255)
-                                       : IM_COL32(100, 116, 139, 255);
-                drawNavIcon(dl, ImVec2(btnPos.x + 20.0f, btnPos.y + btnH * 0.5f), nav.item, iconCol);
+                ImU32 iconCol = active ? IM_COL32(255, 255, 255, 255)
+                                       : (hovered ? u32(ColAccent)
+                                                  : u32(ColTextMuted));
+                drawNavIcon(dl, ImVec2(btnPos.x + 22.0f, btnPos.y + btnH * 0.5f), nav.item, iconCol);
 
                 if (expanded) {
-                    ImGui::SetCursorScreenPos(ImVec2(btnPos.x + 38.0f, btnPos.y + 10.0f));
+                    ImGui::SetCursorScreenPos(ImVec2(btnPos.x + 42.0f, btnPos.y + 12.0f));
                     ImGui::PushFont(fontUiSemibold());
-                    ImGui::TextColored(active ? HEX(0x6D28D9) : ColTextMuted, nav.label);
+                    ImVec4 lblCol = active ? ImVec4(1.0f, 1.0f, 1.0f, 1.0f)
+                                           : (hovered ? ColTextPrimary : ColTextSecondary);
+                    ImGui::TextColored(lblCol, "%s", nav.label);
                     ImGui::PopFont();
                 }
 
-                ImGui::SetCursorScreenPos(btnPos);
-                char id[32];
-                std::snprintf(id, sizeof(id), "##nav%d", i);
-                if (ImGui::InvisibleButton(id, ImVec2(btnW, btnH))) {
+                if (clicked) {
                     uiState.activeNavItem = nav.item;
                 }
 
-                ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
+                ImGui::SetCursorScreenPos(ImVec2(btnPos.x, btnPos.y + btnH + 6.0f));
             }
 
             int rootCount = static_cast<int>(logic::rootTaskIds(store).size());
@@ -335,52 +373,72 @@ namespace ui {
                 ? greetingTitle()
                 : std::string(title);
 
+            float actionW = width > 560.0f ? 148.0f : 118.0f;
+            float rightReserve = actionW + 32.0f;
+            if (width > 760.0f) {
+                rightReserve += 252.0f;
+            } else if (width > 560.0f) {
+                rightReserve += 94.0f;
+            }
+            float titleWrap = (std::max)(140.0f, width - rightReserve);
+
             ImGui::SetCursorPos(ImVec2(8.0f, 11.0f));
             ImGui::PushFont(uiState.activeNavItem == NAV_OVERVIEW ? fontDisplay() : fontHeading());
+            ImGui::PushTextWrapPos(titleWrap);
             ImGui::TextColored(ColTextPrimary, "%s", topTitle.c_str());
+            ImGui::PopTextWrapPos();
             ImGui::PopFont();
 
             ImGui::SetCursorPos(ImVec2(8.0f, 42.0f));
+            ImGui::PushTextWrapPos(titleWrap);
             ImGui::TextColored(ColTextFaint, "%s",
                                uiState.activeNavItem == NAV_OVERVIEW
                                    ? tr(K_OVERVIEW_TOPBAR_SUB)
                                    : subtitle);
+            ImGui::PopTextWrapPos();
 
             data::Date today = logic::today();
             std::string todayText = logic::formatDate(today);
 
-            ImVec2 chipMin = ImVec2(pos.x + width - 408.0f, pos.y + 20.0f);
-            ImVec2 chipMax = ImVec2(pos.x + width - 252.0f, pos.y + 52.0f);
-            dl->AddRectFilled(chipMin, chipMax, ImGui::ColorConvertFloat4ToU32(ColBgSubtle), 16.0f);
-            dl->AddRect(chipMin, chipMax, cardBorderU32(), 16.0f);
-            dl->AddCircle(ImVec2(chipMin.x + 18.0f, chipMin.y + 16.0f), 5.0f, IM_COL32(149, 162, 180, 255), 0, 1.3f);
-            dl->AddLine(ImVec2(chipMin.x + 18.0f, chipMin.y + 16.0f),
-                        ImVec2(chipMin.x + 18.0f, chipMin.y + 13.0f),
-                        IM_COL32(149, 162, 180, 255), 1.2f);
-            dl->AddLine(ImVec2(chipMin.x + 18.0f, chipMin.y + 16.0f),
-                        ImVec2(chipMin.x + 21.0f, chipMin.y + 17.0f),
-                        IM_COL32(149, 162, 180, 255), 1.2f);
-            ImGui::SetCursorScreenPos(ImVec2(chipMin.x + 32.0f, chipMin.y + 7.0f));
-            ImGui::TextColored(ColTextMuted, "%s", todayText.empty() ? tr(K_TODAY_LABEL) : todayText.c_str());
-
-            ImVec2 saveMin = ImVec2(pos.x + width - 244.0f, pos.y + 20.0f);
-            ImVec2 saveMax = ImVec2(pos.x + width - 168.0f, pos.y + 52.0f);
-            ImU32 saveBg = isDarkTheme()
-                ? (store.dirty ? IM_COL32(63, 41, 14, 255) : IM_COL32(14, 50, 36, 255))
-                : (store.dirty ? IM_COL32(255, 247, 237, 255) : IM_COL32(236, 253, 245, 255));
-            ImU32 saveTx = isDarkTheme()
-                ? (store.dirty ? IM_COL32(252, 187, 102, 255) : IM_COL32(110, 220, 170, 255))
-                : (store.dirty ? IM_COL32(180, 83, 9, 255) : IM_COL32(6, 95, 70, 255));
-            dl->AddRectFilled(saveMin, saveMax, saveBg, 16.0f);
-            ImGui::SetCursorScreenPos(ImVec2(saveMin.x + 14.0f, saveMin.y + 7.0f));
-            ImGui::PushFont(fontUiSemibold());
-            ImGui::TextColored(ImGui::ColorConvertU32ToFloat4(saveTx),
-                               "%s", store.dirty ? tr(K_STATE_UNSAVED) : tr(K_STATE_READY));
-            ImGui::PopFont();
-
-            ImGui::SetCursorScreenPos(ImVec2(pos.x + width - 156.0f, pos.y + 18.0f));
-            if (gradientButton("##newTaskTopbar", tr(K_NEW_TASK_BTN), ImVec2(148.0f, 36.0f), 16.0f)) {
+            float cursorRight = pos.x + width - 8.0f;
+            ImGui::SetCursorScreenPos(ImVec2(cursorRight - actionW, pos.y + 18.0f));
+            if (gradientButton("##newTaskTopbar", tr(K_NEW_TASK_BTN), ImVec2(actionW, 36.0f), 16.0f)) {
                 openCreateDialog(uiState, uiState.selectedTaskId);
+            }
+            cursorRight -= actionW + 12.0f;
+
+            if (width > 560.0f) {
+                ImVec2 saveMin = ImVec2(cursorRight - 76.0f, pos.y + 20.0f);
+                ImVec2 saveMax = ImVec2(cursorRight, pos.y + 52.0f);
+                ImU32 saveBg = isDarkTheme()
+                    ? (store.dirty ? IM_COL32(63, 41, 14, 255) : IM_COL32(14, 50, 36, 255))
+                    : (store.dirty ? IM_COL32(255, 247, 237, 255) : IM_COL32(236, 253, 245, 255));
+                ImU32 saveTx = isDarkTheme()
+                    ? (store.dirty ? IM_COL32(252, 187, 102, 255) : IM_COL32(110, 220, 170, 255))
+                    : (store.dirty ? IM_COL32(180, 83, 9, 255) : IM_COL32(6, 95, 70, 255));
+                dl->AddRectFilled(saveMin, saveMax, saveBg, 16.0f);
+                ImGui::SetCursorScreenPos(ImVec2(saveMin.x + 14.0f, saveMin.y + 7.0f));
+                ImGui::PushFont(fontUiSemibold());
+                ImGui::TextColored(ImGui::ColorConvertU32ToFloat4(saveTx),
+                                   "%s", store.dirty ? tr(K_STATE_UNSAVED) : tr(K_STATE_READY));
+                ImGui::PopFont();
+                cursorRight -= 88.0f;
+            }
+
+            if (width > 760.0f) {
+                ImVec2 chipMin = ImVec2(cursorRight - 156.0f, pos.y + 20.0f);
+                ImVec2 chipMax = ImVec2(cursorRight, pos.y + 52.0f);
+                dl->AddRectFilled(chipMin, chipMax, ImGui::ColorConvertFloat4ToU32(ColBgSubtle), 16.0f);
+                dl->AddRect(chipMin, chipMax, cardBorderU32(), 16.0f);
+                dl->AddCircle(ImVec2(chipMin.x + 18.0f, chipMin.y + 16.0f), 5.0f, u32(ColTextFaint), 0, 1.3f);
+                dl->AddLine(ImVec2(chipMin.x + 18.0f, chipMin.y + 16.0f),
+                            ImVec2(chipMin.x + 18.0f, chipMin.y + 13.0f),
+                            u32(ColTextFaint), 1.2f);
+                dl->AddLine(ImVec2(chipMin.x + 18.0f, chipMin.y + 16.0f),
+                            ImVec2(chipMin.x + 21.0f, chipMin.y + 17.0f),
+                            u32(ColTextFaint), 1.2f);
+                ImGui::SetCursorScreenPos(ImVec2(chipMin.x + 32.0f, chipMin.y + 7.0f));
+                ImGui::TextColored(ColTextMuted, "%s", todayText.empty() ? tr(K_TODAY_LABEL) : todayText.c_str());
             }
 
             dl->AddLine(ImVec2(pos.x, pos.y + TOPBAR_H - 1.0f),
@@ -438,11 +496,18 @@ namespace ui {
             ImVec2 max = ImVec2(min.x + width, min.y + 116.0f);
             UrgencyColor pc = colorForPriority(task.priority);
             ImU32 accent = urgencyToImU32(pc);
+            char id[32];
+            std::snprintf(id, sizeof(id), "##overviewTask%d", task.id);
+            bool hovered = ImGui::IsMouseHoveringRect(min, max);
+            float hoverT = animateHover(id, hovered, 0.18f);
 
-            drawSoftShadow(dl, min, max, 18.0f);
+            drawSoftShadow(dl, min, max, 18.0f,
+                           hovered ? IM_COL32(15, 23, 42, 20) : IM_COL32(15, 23, 42, 12),
+                           ImVec2(0.0f, 6.0f + 2.0f * hoverT));
             dl->AddRectFilled(min, max, cardBgU32(), 18.0f);
             dl->AddRect(min, max,
-                        uiState.selectedTaskId == task.id ? IM_COL32(124, 58, 237, 255)
+                        uiState.selectedTaskId == task.id ? u32(ColAccent)
+                                                          : hovered ? u32(ColBorderStrong)
                                                           : cardBorderU32(),
                         18.0f, 0, 1.3f);
             dl->AddRectFilled(ImVec2(min.x + 18.0f, min.y + 18.0f),
@@ -476,8 +541,6 @@ namespace ui {
             ImGui::PopFont();
 
             ImGui::SetCursorScreenPos(min);
-            char id[32];
-            std::snprintf(id, sizeof(id), "##overviewTask%d", task.id);
             if (ImGui::InvisibleButton(id, ImVec2(width, 116.0f))) {
                 uiState.selectedTaskId = task.id;
                 uiState.activeNavItem = NAV_TASKS;
@@ -505,35 +568,57 @@ namespace ui {
             }
 
             float avail = ImGui::GetContentRegionAvail().x;
+            float availH = ImGui::GetContentRegionAvail().y;
             float gap = 20.0f;
-            float sideW = avail > 1180.0f ? 324.0f : 290.0f;
-            float mainW = avail - sideW - gap;
-            if (mainW < 520.0f) {
+            bool stacked = avail < 980.0f;
+            float sideW = stacked ? avail : (avail > 1180.0f ? 324.0f : 290.0f);
+            float mainW = stacked ? avail : avail - sideW - gap;
+            if (!stacked && mainW < 520.0f) {
                 sideW = 280.0f;
                 mainW = avail - sideW - gap;
             }
+            float mainH = stacked ? (std::max)(360.0f, availH * 0.58f) : 0.0f;
 
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(16.0f, 16.0f));
-            ImGui::BeginChild("##OverviewMain", ImVec2(mainW, 0.0f), ImGuiChildFlags_AlwaysUseWindowPadding);
+            ImGui::BeginChild("##OverviewMain", ImVec2(mainW, mainH), ImGuiChildFlags_AlwaysUseWindowPadding);
 
             float contentW = ImGui::GetContentRegionAvail().x;
             float metricGap = 14.0f;
-            float metricW = (contentW - metricGap * 3.0f) * 0.25f;
-            renderMetricCard("##metricAll", static_cast<int>(store.tasks.size()),
-                             tr(K_OV_TOTAL_TASKS), inProgress > 0 ? tr(K_OV_IN_PROGRESS_NOW) : tr(K_OV_QUIET_QUEUE),
-                             IM_COL32(124, 58, 237, 255), metricW);
-            ImGui::SameLine(0, metricGap);
-            renderMetricCard("##metricDone", completed,
-                             tr(K_OV_COMPLETED), tr(K_OV_SHIPPING_CLEAN),
-                             IM_COL32(5, 150, 105, 255), metricW);
-            ImGui::SameLine(0, metricGap);
-            renderMetricCard("##metricRoot", static_cast<int>(roots.size()),
-                             tr(K_OV_ACTIVE_PROJECTS), tr(K_OV_ROOT_TREES),
-                             IM_COL32(37, 99, 235, 255), metricW);
-            ImGui::SameLine(0, metricGap);
-            renderMetricCard("##metricBlocked", blocked,
-                             tr(K_OV_BLOCKED), blocked > 0 ? tr(K_OV_NEEDS_ATTENTION) : tr(K_OV_NO_BLOCKERS),
-                             IM_COL32(220, 38, 38, 255), metricW);
+            if (contentW < 760.0f) {
+                float metricW = (contentW - metricGap) * 0.5f;
+                renderMetricCard("##metricAll", static_cast<int>(store.tasks.size()),
+                                 tr(K_OV_TOTAL_TASKS), inProgress > 0 ? tr(K_OV_IN_PROGRESS_NOW) : tr(K_OV_QUIET_QUEUE),
+                                 u32(ColAccent), metricW);
+                ImGui::SameLine(0, metricGap);
+                renderMetricCard("##metricDone", completed,
+                                 tr(K_OV_COMPLETED), tr(K_OV_SHIPPING_CLEAN),
+                                 IM_COL32(5, 150, 105, 255), metricW);
+                ImGui::Dummy(ImVec2(1.0f, metricGap));
+                renderMetricCard("##metricRoot", static_cast<int>(roots.size()),
+                                 tr(K_OV_ACTIVE_PROJECTS), tr(K_OV_ROOT_TREES),
+                                 IM_COL32(37, 99, 235, 255), metricW);
+                ImGui::SameLine(0, metricGap);
+                renderMetricCard("##metricBlocked", blocked,
+                                 tr(K_OV_BLOCKED), blocked > 0 ? tr(K_OV_NEEDS_ATTENTION) : tr(K_OV_NO_BLOCKERS),
+                                 IM_COL32(220, 38, 38, 255), metricW);
+            } else {
+                float metricW = (contentW - metricGap * 3.0f) * 0.25f;
+                renderMetricCard("##metricAll", static_cast<int>(store.tasks.size()),
+                                 tr(K_OV_TOTAL_TASKS), inProgress > 0 ? tr(K_OV_IN_PROGRESS_NOW) : tr(K_OV_QUIET_QUEUE),
+                                 u32(ColAccent), metricW);
+                ImGui::SameLine(0, metricGap);
+                renderMetricCard("##metricDone", completed,
+                                 tr(K_OV_COMPLETED), tr(K_OV_SHIPPING_CLEAN),
+                                 IM_COL32(5, 150, 105, 255), metricW);
+                ImGui::SameLine(0, metricGap);
+                renderMetricCard("##metricRoot", static_cast<int>(roots.size()),
+                                 tr(K_OV_ACTIVE_PROJECTS), tr(K_OV_ROOT_TREES),
+                                 IM_COL32(37, 99, 235, 255), metricW);
+                ImGui::SameLine(0, metricGap);
+                renderMetricCard("##metricBlocked", blocked,
+                                 tr(K_OV_BLOCKED), blocked > 0 ? tr(K_OV_NEEDS_ATTENTION) : tr(K_OV_NO_BLOCKERS),
+                                 IM_COL32(220, 38, 38, 255), metricW);
+            }
 
             ImGui::Dummy(ImVec2(1.0f, 18.0f));
             ImGui::PushFont(fontHeading());
@@ -561,7 +646,11 @@ namespace ui {
             ImGui::EndChild();
             ImGui::PopStyleVar();
 
-            ImGui::SameLine(0, gap);
+            if (stacked) {
+                ImGui::Dummy(ImVec2(1.0f, gap));
+            } else {
+                ImGui::SameLine(0, gap);
+            }
             ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(16.0f, 16.0f));
             ImGui::BeginChild("##OverviewSide", ImVec2(0.0f, 0.0f), ImGuiChildFlags_AlwaysUseWindowPadding);
 
@@ -583,9 +672,17 @@ namespace ui {
 
                     ImVec2 min = ImGui::GetCursorScreenPos();
                     ImVec2 max = ImVec2(min.x + sideContentW, min.y + 72.0f);
-                    drawSoftShadow(ImGui::GetWindowDrawList(), min, max, 18.0f);
+                    char id[32];
+                    std::snprintf(id, sizeof(id), "##rootCard%d", root->id);
+                    bool hovered = ImGui::IsMouseHoveringRect(min, max);
+                    float hoverT = animateHover(id, hovered, 0.18f);
+                    drawSoftShadow(ImGui::GetWindowDrawList(), min, max, 18.0f,
+                                   hovered ? IM_COL32(15, 23, 42, 20) : IM_COL32(15, 23, 42, 12),
+                                   ImVec2(0.0f, 5.0f + 2.0f * hoverT));
                     ImGui::GetWindowDrawList()->AddRectFilled(min, max, cardBgU32(), 18.0f);
-                    ImGui::GetWindowDrawList()->AddRect(min, max, cardBorderU32(), 18.0f);
+                    ImGui::GetWindowDrawList()->AddRect(min, max,
+                                                        hovered ? u32(ColBorderStrong) : cardBorderU32(),
+                                                        18.0f);
 
                     UrgencyColor pc = colorForPriority(root->priority);
                     ImU32 accent = urgencyToImU32(pc);
@@ -606,8 +703,6 @@ namespace ui {
                     ImGui::PopTextWrapPos();
 
                     ImGui::SetCursorScreenPos(min);
-                    char id[32];
-                    std::snprintf(id, sizeof(id), "##rootCard%d", root->id);
                     if (ImGui::InvisibleButton(id, ImVec2(sideContentW, 72.0f))) {
                         uiState.selectedTaskId = root->id;
                         uiState.activeNavItem = NAV_TASKS;
@@ -631,7 +726,7 @@ namespace ui {
                     ImVec2 max = ImVec2(min.x + sideContentW, min.y + 64.0f);
                     ImGui::GetWindowDrawList()->AddLine(ImVec2(min.x, max.y),
                                                         ImVec2(max.x, max.y),
-                                                        IM_COL32(228, 234, 242, 255));
+                                                        u32(ColBorder));
 
                     BadgeStyle badge = statusBadgeStyle(task.status);
                     ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(min.x, min.y + 6.0f),
@@ -659,15 +754,62 @@ namespace ui {
 
         void renderTaskWorkspace(data::TaskStore& store, UiState& uiState) {
             float avail = ImGui::GetContentRegionAvail().x;
+            float availH = ImGui::GetContentRegionAvail().y;
+
+            ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 20.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
+
+            if (avail < 720.0f) {
+                float treeH = 190.0f;
+                float listH = (std::max)(260.0f, availH * 0.42f);
+
+                ImGui::BeginChild("##TreePane", ImVec2(0.0f, treeH), true);
+                renderTaskTreePanel(store, uiState);
+                ImGui::EndChild();
+
+                ImGui::Dummy(ImVec2(1.0f, 8.0f));
+                ImGui::BeginChild("##TaskPane", ImVec2(0.0f, listH), true);
+                renderTaskTablePanel(store, uiState);
+                ImGui::EndChild();
+
+                ImGui::Dummy(ImVec2(1.0f, 8.0f));
+                ImGui::BeginChild("##DetailPane", ImVec2(0.0f, 0.0f), true);
+                renderTaskDetailsPanel(store, uiState);
+                ImGui::EndChild();
+
+                ImGui::PopStyleVar(2);
+                return;
+            }
+
+            if (avail < 1080.0f) {
+                float topH = (std::max)(320.0f, availH * 0.56f);
+                float treeW = (std::min)(280.0f, avail * 0.34f);
+                float listW = avail - treeW - 8.0f;
+
+                ImGui::BeginChild("##TreePane", ImVec2(treeW, topH), true);
+                renderTaskTreePanel(store, uiState);
+                ImGui::EndChild();
+
+                ImGui::SameLine(0, 8.0f);
+                ImGui::BeginChild("##TaskPane", ImVec2(listW, topH), true);
+                renderTaskTablePanel(store, uiState);
+                ImGui::EndChild();
+
+                ImGui::Dummy(ImVec2(1.0f, 8.0f));
+                ImGui::BeginChild("##DetailPane", ImVec2(0.0f, 0.0f), true);
+                renderTaskDetailsPanel(store, uiState);
+                ImGui::EndChild();
+
+                ImGui::PopStyleVar(2);
+                return;
+            }
+
             float treeW = avail * 0.23f;
             float listW = avail * 0.43f;
             float detailsW = avail - treeW - listW - 16.0f;
             if (treeW < 220.0f) treeW = 220.0f;
             if (listW < 360.0f) listW = 360.0f;
             if (detailsW < 290.0f) detailsW = 290.0f;
-
-            ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 20.0f);
-            ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1.0f);
 
             ImGui::BeginChild("##TreePane", ImVec2(treeW, 0.0f), true);
             renderTaskTreePanel(store, uiState);
@@ -713,6 +855,11 @@ namespace ui {
                 ImGui::PopStyleVar();
                 return;
             }
+
+            drawShellBackdrop(ImGui::GetWindowDrawList(),
+                              ImGui::GetWindowPos(),
+                              ImVec2(ImGui::GetWindowPos().x + ImGui::GetWindowWidth(),
+                                     ImGui::GetWindowPos().y + ImGui::GetWindowHeight()));
 
             if (uiState.showStatsPanel) {
                 uiState.activeNavItem = NAV_ANALYTICS;
