@@ -57,7 +57,8 @@ namespace ui {
                                    cardMin.y + 14.0f + 24.0f + radius);
 
             if (total <= 0.0f) {
-                dl->AddCircleFilled(centre, radius, IM_COL32(241, 245, 249, 255), 64);
+                dl->AddCircleFilled(centre, radius,
+                                    ImGui::ColorConvertFloat4ToU32(ColBgSubtle), 64);
                 dl->AddCircle(centre, radius, cardBorderU32(), 64, 1.5f);
                 ImGui::SetCursorScreenPos(ImVec2(centre.x - 28.0f, centre.y - 8.0f));
                 ImGui::TextColored(ColTextFaint, "No data");
@@ -135,7 +136,7 @@ namespace ui {
             ImVec2 pos = ImGui::GetCursorScreenPos();
             ImDrawList* dl = ImGui::GetWindowDrawList();
             dl->AddRectFilled(pos, ImVec2(pos.x + width, pos.y + 12.0f),
-                              IM_COL32(241, 245, 249, 255), 99.0f);
+                              ImGui::ColorConvertFloat4ToU32(ColBgSubtle), 99.0f);
             dl->AddRectFilled(pos,
                               ImVec2(pos.x + width * pct, pos.y + 12.0f),
                               GradLeft, 99.0f);
@@ -199,17 +200,17 @@ namespace ui {
             ImVec2 max = ImVec2(min.x + badgeW, min.y + 86.0f);
             ImDrawList* dl = ImGui::GetWindowDrawList();
             dl->AddRectFilled(min, max,
-                              earned ? IM_COL32(238, 233, 255, 255)
-                                     : IM_COL32(248, 250, 253, 255),
+                              ImGui::ColorConvertFloat4ToU32(
+                                  earned ? ColBgActive : ColBgCardSoft),
                               16.0f);
             dl->AddRect(min, max,
-                        earned ? IM_COL32(124, 58, 237, 255)
+                        earned ? ImGui::ColorConvertFloat4ToU32(ColAccent)
                                : cardBorderU32(),
                         16.0f, 0, earned ? 1.6f : 1.0f);
 
             dl->AddCircleFilled(ImVec2(min.x + 26.0f, min.y + 30.0f), 12.0f,
-                                earned ? IM_COL32(124, 58, 237, 255)
-                                       : IM_COL32(203, 213, 225, 255));
+                                earned ? ImGui::ColorConvertFloat4ToU32(ColAccent)
+                                       : ImGui::ColorConvertFloat4ToU32(ColBorderStrong));
 
             ImGui::SetCursorScreenPos(ImVec2(min.x + 50.0f, min.y + 14.0f));
             ImGui::PushFont(fontUiSemibold());
