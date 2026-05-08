@@ -29,6 +29,97 @@ namespace ui {
             ImGui::Dummy(ImVec2(width, 96.0f));
         }
 
+        void renderPieChart(const char* title,
+                            const float* vals, const ImU32* cols,
+                            const char* const* names, int count,
+                            float width) {
+            float total = 0.0f;
+            for (int i = 0; i < count; ++i) {
+                total += vals[i];
+            }
+
+            ImVec2 origin = ImGui::GetCursorScreenPos();
+            float cardH = 220.0f;
+            ImVec2 cardMin = origin;
+            ImVec2 cardMax = ImVec2(origin.x + width, origin.y + cardH);
+            ImDrawList* dl = ImGui::GetWindowDrawList();
+            drawSoftShadow(dl, cardMin, cardMax, 18.0f);
+            dl->AddRectFilled(cardMin, cardMax, cardBgU32(), 18.0f);
+            dl->AddRect(cardMin, cardMax, cardBorderU32(), 18.0f);
+
+            ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 16.0f, cardMin.y + 14.0f));
+            ImGui::PushFont(fontUiSemibold());
+            ImGui::TextColored(ColTextPrimary, "%s", title);
+            ImGui::PopFont();
+
+            float radius = 70.0f;
+            ImVec2 centre = ImVec2(cardMin.x + 16.0f + radius + 8.0f,
+                                   cardMin.y + 14.0f + 24.0f + radius);
+
+            if (total <= 0.0f) {
+                dl->AddCircleFilled(centre, radius, IM_COL32(241, 245, 249, 255), 64);
+                dl->AddCircle(centre, radius, cardBorderU32(), 64, 1.5f);
+                ImGui::SetCursorScreenPos(ImVec2(centre.x - 28.0f, centre.y - 8.0f));
+                ImGui::TextColored(ColTextFaint, "No data");
+            } else {
+                const float TWO_PI = 6.2831853f;
+                float startAngle = -1.5707963f;
+                for (int i = 0; i < count; ++i) {
+                    if (vals[i] <= 0.0f) {
+                        continue;
+                    }
+                    float frac = vals[i] / total;
+                    float endAngle = startAngle + frac * TWO_PI;
+                    int segs = (int)(frac * 64.0f) + 8;
+
+                    if (frac >= 0.999f) {
+                        dl->AddCircleFilled(centre, radius, cols[i], 64);
+                    } else {
+                        dl->PathClear();
+                        dl->PathLineTo(centre);
+                        dl->PathArcTo(centre, radius, startAngle, endAngle, segs);
+                        dl->PathFillConvex(cols[i]);
+                    }
+                    startAngle = endAngle;
+                }
+                dl->AddCircleFilled(centre, radius * 0.45f, cardBgU32(), 48);
+                dl->AddCircle(centre, radius * 0.45f, cardBorderU32(), 48, 1.0f);
+
+                char totalBuf[16];
+                std::snprintf(totalBuf, sizeof(totalBuf), "%d", (int)total);
+                ImVec2 sz = ImGui::CalcTextSize(totalBuf);
+                ImGui::SetCursorScreenPos(ImVec2(centre.x - sz.x * 0.5f,
+                                                 centre.y - sz.y - 2.0f));
+                ImGui::PushFont(fontUiSemibold());
+                ImGui::TextColored(ColTextPrimary, "%s", totalBuf);
+                ImGui::PopFont();
+                ImVec2 sz2 = ImGui::CalcTextSize("total");
+                ImGui::SetCursorScreenPos(ImVec2(centre.x - sz2.x * 0.5f,
+                                                 centre.y + 2.0f));
+                ImGui::TextColored(ColTextFaint, "total");
+            }
+
+            float legendX = cardMin.x + 16.0f + radius * 2.0f + 32.0f;
+            float legendY = cardMin.y + 42.0f;
+            float rowH = 28.0f;
+            for (int i = 0; i < count; ++i) {
+                float pct = (total > 0.0f) ? (vals[i] / total * 100.0f) : 0.0f;
+                ImVec2 sw = ImVec2(legendX, legendY + i * rowH);
+                dl->AddRectFilled(sw, ImVec2(sw.x + 14.0f, sw.y + 14.0f),
+                                  cols[i], 4.0f);
+                ImGui::SetCursorScreenPos(ImVec2(sw.x + 22.0f, sw.y - 2.0f));
+                ImGui::PushFont(fontUiSemibold());
+                ImGui::TextColored(ColTextPrimary, "%s", names[i]);
+                ImGui::PopFont();
+                ImGui::SetCursorScreenPos(ImVec2(sw.x + 22.0f, sw.y + 14.0f));
+                ImGui::TextColored(ColTextFaint, "%d  %.1f%%",
+                                   (int)vals[i], pct);
+            }
+
+            ImGui::SetCursorScreenPos(origin);
+            ImGui::Dummy(ImVec2(width, cardH));
+        }
+
         void renderXpBar(const data::ProductivityState& p, float width) {
             int level = logic::currentLevel(p);
             float pct = logic::levelProgress(p);
@@ -142,6 +233,55 @@ namespace ui {
                 ImGui::Dummy(ImVec2(1.0f, badgeGap));
             }
         }
+
+        ImGui::Dummy(ImVec2(1.0f, 22.0f));
+        ImGui::PushFont(fontHeading());
+        ImGui::TextColored(ColTextPrimary, "Task Mix");
+        ImGui::PopFont();
+        ImGui::TextColored(ColTextMuted,
+                           "Distribution by status and priority across all tasks.");
+        ImGui::Dummy(ImVec2(1.0f, 10.0f));
+
+        float byStatus[4] = {};
+        float byPriority[4] = {};
+        for (const data::Task& t : store.tasks) {
+            int s = static_cast<int>(t.status);
+            int pr = static_cast<int>(t.priority);
+            if (s >= 0 && s < 4) byStatus[s] += 1.0f;
+            if (pr >= 0 && pr < 4) byPriority[pr] += 1.0f;
+        }
+
+        ImU32 statusCols[4] = {
+            IM_COL32(148, 163, 184, 255),
+            IM_COL32(217, 119,   6, 255),
+            IM_COL32(  5, 150, 105, 255),
+            IM_COL32(220,  38,  38, 255),
+        };
+        const char* statusNames[4] = {
+            statusLabel(data::STATUS_TODO),
+            statusLabel(data::STATUS_IN_PROGRESS),
+            statusLabel(data::STATUS_DONE),
+            statusLabel(data::STATUS_BLOCKED),
+        };
+
+        ImU32 priorityCols[4] = {
+            IM_COL32(  5, 150, 105, 255),
+            IM_COL32( 37,  99, 235, 255),
+            IM_COL32(234,  88,  12, 255),
+            IM_COL32(220,  38,  38, 255),
+        };
+        const char* priorityNames[4] = {
+            priorityLabel(data::PRIORITY_LOW),
+            priorityLabel(data::PRIORITY_MEDIUM),
+            priorityLabel(data::PRIORITY_HIGH),
+            priorityLabel(data::PRIORITY_CRITICAL),
+        };
+
+        float pieGap = 14.0f;
+        float pieW = (avail - pieGap) * 0.5f;
+        renderPieChart("By Status", byStatus, statusCols, statusNames, 4, pieW);
+        ImGui::SameLine(0, pieGap);
+        renderPieChart("By Priority", byPriority, priorityCols, priorityNames, 4, pieW);
     }
 
 }
