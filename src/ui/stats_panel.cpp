@@ -13,40 +13,34 @@ namespace ui {
 
         void renderStatCard(const char* id, const char* label, const char* value,
                             const char* sub, ImU32 accent, float width) {
-            ImGui::PushStyleColor(ImGuiCol_ChildBg, ColBgCard);
-            ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 18.0f);
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-            ImGui::BeginChild(id, ImVec2(width, 104.0f), true);
-
-            ImDrawList* dl = ImGui::GetWindowDrawList();
-            ImVec2 min = ImGui::GetWindowPos();
+            ImVec2 origin = ImGui::GetCursorScreenPos();
+            ImVec2 min = origin;
             ImVec2 max = ImVec2(min.x + width, min.y + 104.0f);
-            drawSoftShadow(dl, min, max, 18.0f);
-            dl->AddRectFilled(min, max, cardBgU32(), 18.0f);
-            dl->AddRect(min, max, cardBorderU32(), 18.0f);
-            dl->AddRectFilled(ImVec2(min.x + 16.0f, min.y + 18.0f),
-                              ImVec2(min.x + 56.0f, min.y + 58.0f),
+            CardVisual cv = drawCardChrome(id, min, max, 18.0f, 6.0f);
+            ImDrawList* dl = ImGui::GetWindowDrawList();
+
+            dl->AddRectFilled(ImVec2(cv.drawMin.x + 16.0f, cv.drawMin.y + 18.0f),
+                              ImVec2(cv.drawMin.x + 56.0f, cv.drawMin.y + 58.0f),
                               IM_COL32((accent >> IM_COL32_R_SHIFT) & 255,
                                        (accent >> IM_COL32_G_SHIFT) & 255,
                                        (accent >> IM_COL32_B_SHIFT) & 255, 20), 12.0f);
-            dl->AddCircleFilled(ImVec2(min.x + 36.0f, min.y + 38.0f), 6.0f, accent);
+            dl->AddCircleFilled(ImVec2(cv.drawMin.x + 36.0f, cv.drawMin.y + 38.0f), 6.0f, accent);
 
-            ImGui::SetCursorPos(ImVec2(74.0f, 16.0f));
+            ImGui::SetCursorScreenPos(ImVec2(cv.drawMin.x + 74.0f, cv.drawMin.y + 16.0f));
             ImGui::PushFont(fontDisplay());
             ImGui::TextColored(ColTextPrimary, "%s", value);
             ImGui::PopFont();
-            ImGui::SetCursorPos(ImVec2(74.0f, 56.0f));
+            ImGui::SetCursorScreenPos(ImVec2(cv.drawMin.x + 74.0f, cv.drawMin.y + 56.0f));
             ImGui::TextColored(ColTextMuted, "%s", label);
             if (sub != nullptr && sub[0] != '\0') {
-                ImGui::SetCursorPos(ImVec2(74.0f, 76.0f));
+                ImGui::SetCursorScreenPos(ImVec2(cv.drawMin.x + 74.0f, cv.drawMin.y + 76.0f));
                 ImGui::PushFont(fontUiSemibold());
                 ImGui::TextColored(ImGui::ColorConvertU32ToFloat4(accent), "%s", sub);
                 ImGui::PopFont();
             }
 
-            ImGui::EndChild();
-            ImGui::PopStyleVar(2);
-            ImGui::PopStyleColor();
+            ImGui::SetCursorScreenPos(min);
+            ImGui::Dummy(ImVec2(width, 104.0f));
         }
 
         void renderDistributionBar(const float* vals, const ImU32* cols,
@@ -190,32 +184,33 @@ namespace ui {
 
                 ImVec2 min = ImGui::GetCursorScreenPos();
                 ImVec2 max = ImVec2(min.x + analyticsW, min.y + 84.0f);
-                ImDrawList* dl = ImGui::GetWindowDrawList();
-                dl->AddRectFilled(min, max, cardBgU32(), 18.0f);
-                dl->AddRect(min, max, cardBorderU32(), 18.0f);
+                char rid[32];
+                std::snprintf(rid, sizeof(rid), "##stRoot%d", root->id);
+                CardVisual cv = drawCardChrome(rid, min, max, 18.0f, 6.0f);
 
                 float completion = logic::calculateWeightedCompletion(store, root->id);
                 UrgencyColor pc = colorForPriority(root->priority);
                 ImU32 accent = urgencyToImU32(pc);
-                renderProgressRing(ImVec2(min.x + 32.0f, min.y + 42.0f), 16.0f, 4.0f,
+                renderProgressRing(ImVec2(cv.drawMin.x + 32.0f, cv.drawMin.y + 42.0f), 16.0f, 4.0f,
                                    completion * 100.0f, accent);
 
-                ImGui::SetCursorScreenPos(ImVec2(min.x + 64.0f, min.y + 18.0f));
+                ImGui::SetCursorScreenPos(ImVec2(cv.drawMin.x + 64.0f, cv.drawMin.y + 18.0f));
                 ImGui::PushFont(fontUiSemibold());
                 ImGui::TextColored(ColTextPrimary, "%s", root->title.c_str());
                 ImGui::PopFont();
                 int totalEstMins = logic::calculateTotalEstimatedMinutes(store, root->id);
-                ImGui::SetCursorScreenPos(ImVec2(min.x + 64.0f, min.y + 42.0f));
+                ImGui::SetCursorScreenPos(ImVec2(cv.drawMin.x + 64.0f, cv.drawMin.y + 42.0f));
                 ImGui::TextColored(ColTextFaint,
                                    tr(K_ST_PROJECT_DETAIL_FMT),
                                    totalEstMins / 60,
                                    totalEstMins % 60,
                                    logic::countDescendants(store, root->id),
                                    logic::maxSubtreeDepth(store, root->id));
-                ImGui::SetCursorScreenPos(ImVec2(max.x - 74.0f, min.y + 30.0f));
+                ImGui::SetCursorScreenPos(ImVec2(cv.drawMax.x - 74.0f, cv.drawMin.y + 30.0f));
                 ImGui::PushFont(fontUiSemibold());
                 ImGui::TextColored(ColTextMuted, "%.0f%%", completion * 100.0f);
                 ImGui::PopFont();
+                ImGui::SetCursorScreenPos(min);
                 ImGui::Dummy(ImVec2(1.0f, 96.0f));
             }
         }
@@ -235,39 +230,38 @@ namespace ui {
 
         ImVec2 cardMin = ImGui::GetCursorScreenPos();
         ImVec2 cardMax = ImVec2(cardMin.x + signalsW, cardMin.y + 156.0f);
-        ImDrawList* dl = ImGui::GetWindowDrawList();
-        dl->AddRectFilled(cardMin, cardMax, cardBgU32(), 18.0f);
-        dl->AddRect(cardMin, cardMax, cardBorderU32(), 18.0f);
-        ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 16.0f, cardMin.y + 18.0f));
+        CardVisual sigA = drawCardChrome("##stSigOverdue", cardMin, cardMax, 18.0f, 6.0f);
+        ImGui::SetCursorScreenPos(ImVec2(sigA.drawMin.x + 16.0f, sigA.drawMin.y + 18.0f));
         ImGui::PushFont(fontUiSemibold());
         ImGui::TextColored(ColTextPrimary, "%s", tr(K_ST_OVERDUE_PRESSURE));
         ImGui::PopFont();
-        ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 16.0f, cardMin.y + 48.0f));
+        ImGui::SetCursorScreenPos(ImVec2(sigA.drawMin.x + 16.0f, sigA.drawMin.y + 48.0f));
         ImGui::PushFont(fontDisplay());
         ImGui::TextColored(overdue > 0 ? HEX(0xDC2626) : HEX(0x059669), "%d", overdue);
         ImGui::PopFont();
-        ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 16.0f, cardMin.y + 88.0f));
+        ImGui::SetCursorScreenPos(ImVec2(sigA.drawMin.x + 16.0f, sigA.drawMin.y + 88.0f));
         ImGui::TextColored(ColTextFaint, "%s",
                            overdue > 0 ? tr(K_ST_OVERDUE_BODY)
                                        : tr(K_ST_OVERDUE_NONE));
+        ImGui::SetCursorScreenPos(cardMin);
         ImGui::Dummy(ImVec2(1.0f, 168.0f));
 
         cardMin = ImGui::GetCursorScreenPos();
         cardMax = ImVec2(cardMin.x + signalsW, cardMin.y + 156.0f);
-        dl->AddRectFilled(cardMin, cardMax, cardBgU32(), 18.0f);
-        dl->AddRect(cardMin, cardMax, cardBorderU32(), 18.0f);
-        ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 16.0f, cardMin.y + 18.0f));
+        CardVisual sigB = drawCardChrome("##stSigExec", cardMin, cardMax, 18.0f, 6.0f);
+        ImGui::SetCursorScreenPos(ImVec2(sigB.drawMin.x + 16.0f, sigB.drawMin.y + 18.0f));
         ImGui::PushFont(fontUiSemibold());
         ImGui::TextColored(ColTextPrimary, "%s", tr(K_ST_EXEC_MIX));
         ImGui::PopFont();
-        ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 16.0f, cardMin.y + 50.0f));
+        ImGui::SetCursorScreenPos(ImVec2(sigB.drawMin.x + 16.0f, sigB.drawMin.y + 50.0f));
         ImGui::TextColored(ColTextMuted, tr(K_ST_IN_PROGRESS_FMT), byStatus[data::STATUS_IN_PROGRESS]);
-        ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 16.0f, cardMin.y + 74.0f));
+        ImGui::SetCursorScreenPos(ImVec2(sigB.drawMin.x + 16.0f, sigB.drawMin.y + 74.0f));
         ImGui::TextColored(ColTextMuted, tr(K_ST_BLOCKED_FMT), byStatus[data::STATUS_BLOCKED]);
-        ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 16.0f, cardMin.y + 98.0f));
+        ImGui::SetCursorScreenPos(ImVec2(sigB.drawMin.x + 16.0f, sigB.drawMin.y + 98.0f));
         ImGui::TextColored(ColTextMuted, tr(K_ST_DONE_FMT), byStatus[data::STATUS_DONE]);
-        ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 16.0f, cardMin.y + 122.0f));
+        ImGui::SetCursorScreenPos(ImVec2(sigB.drawMin.x + 16.0f, sigB.drawMin.y + 122.0f));
         ImGui::TextColored(ColTextFaint, "%s", tr(K_ST_FLOW_HINT));
+        ImGui::SetCursorScreenPos(cardMin);
         ImGui::Dummy(ImVec2(1.0f, 168.0f));
 
         ImGui::EndChild();

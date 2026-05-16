@@ -20,6 +20,7 @@
 #include "logic/sort.h"
 #include "data/store.h"
 #include "imgui.h"
+#include <cmath>
 
 namespace ui {
 
@@ -253,14 +254,54 @@ namespace ui {
             };
             const int navItemCount = static_cast<int>(IM_ARRAYSIZE(navItems));
 
+            const float NAV_BTN_H   = 44.0f;
+            const float NAV_BTN_GAP = 6.0f;
+            const float NAV_BASE_Y  = origin.y + 84.0f;
+            const float NAV_BTN_W   = sidebarW - 22.0f;
+            const float NAV_LEFT_X  = origin.x + 11.0f;
+
+            int activeIdx = 0;
+            for (int i = 0; i < navItemCount; ++i) {
+                if (navItems[i].item == uiState.activeNavItem) { activeIdx = i; break; }
+            }
+            float targetIndY = NAV_BASE_Y + activeIdx * (NAV_BTN_H + NAV_BTN_GAP);
+
+            ImGuiStorage* navStore = ImGui::GetStateStorage();
+            ImGuiID indKey = ImGui::GetID("##navIndY");
+            float curIndY = navStore->GetFloat(indKey, targetIndY);
+            float navDt   = ImGui::GetIO().DeltaTime;
+            float lerpK   = 1.0f - std::exp(-navDt * 16.0f);
+            curIndY += (targetIndY - curIndY) * lerpK;
+            if (std::fabs(curIndY - targetIndY) < 0.25f) curIndY = targetIndY;
+            navStore->SetFloat(indKey, curIndY);
+
+            {
+                ImVec2 indMin = ImVec2(NAV_LEFT_X, curIndY);
+                ImVec2 indMax = ImVec2(NAV_LEFT_X + NAV_BTN_W, curIndY + NAV_BTN_H);
+                drawSoftShadow(dl, indMin, indMax, 12.0f,
+                               IM_COL32(124, 58, 237, 110), ImVec2(0.0f, 10.0f));
+                drawSoftShadow(dl, indMin, indMax, 12.0f,
+                               IM_COL32(124, 58, 237, 70), ImVec2(0.0f, 4.0f));
+                drawGradientRect(dl, indMin, indMax, 12.0f, GradLeft, GradMid);
+                dl->AddRectFilled(ImVec2(indMin.x, indMin.y + 6.0f),
+                                  ImVec2(indMin.x + 4.0f, indMax.y - 6.0f),
+                                  IM_COL32(255, 255, 255, 220), 99.0f);
+                dl->AddLine(ImVec2(indMin.x + 8.0f, indMin.y + 1.0f),
+                            ImVec2(indMax.x - 8.0f, indMin.y + 1.0f),
+                            IM_COL32(255, 255, 255, 80), 1.0f);
+                dl->AddLine(ImVec2(indMin.x + 8.0f, indMax.y - 1.0f),
+                            ImVec2(indMax.x - 8.0f, indMax.y - 1.0f),
+                            IM_COL32(0, 0, 0, 60), 1.0f);
+            }
+
             ImGui::SetCursorPosY(84.0f);
             for (int i = 0; i < navItemCount; ++i) {
                 ImGui::SetCursorPosX(11.0f);
                 const NavDef& nav = navItems[i];
                 bool active = uiState.activeNavItem == nav.item;
                 ImVec2 btnPos = ImGui::GetCursorScreenPos();
-                float btnH = 44.0f;
-                float btnW = sidebarW - 22.0f;
+                float btnH = NAV_BTN_H;
+                float btnW = NAV_BTN_W;
                 ImVec2 btnEnd = ImVec2(btnPos.x + btnW, btnPos.y + btnH);
 
                 char id[32];
@@ -268,30 +309,64 @@ namespace ui {
                 ImGui::SetCursorScreenPos(btnPos);
                 ImGui::InvisibleButton(id, ImVec2(btnW, btnH));
                 bool hovered = ImGui::IsItemHovered();
+                bool held    = ImGui::IsItemActive();
                 bool clicked = ImGui::IsItemClicked();
                 float anim = animateHover(id, hovered);
 
-                if (active) {
-                    drawSoftShadow(dl, btnPos, btnEnd, 12.0f,
-                                   IM_COL32(124, 58, 237, 60), ImVec2(0.0f, 4.0f));
-                    drawGradientRect(dl, btnPos, btnEnd, 12.0f, GradLeft, GradMid);
-                    dl->AddRectFilled(ImVec2(btnPos.x, btnPos.y + 6.0f),
-                                      ImVec2(btnPos.x + 4.0f, btnPos.y + btnH - 6.0f),
-                                      IM_COL32(255, 255, 255, 220), 99.0f);
-                } else if (anim > 0.001f) {
-                    int alpha = (int)(anim * 255.0f);
+                float lift = active ? 0.0f : (anim * 5.0f - (held ? 2.0f : 0.0f));
+                if (lift < 0.0f) lift = 0.0f;
+                ImVec2 drawMin = ImVec2(btnPos.x, btnPos.y - lift);
+                ImVec2 drawMax = ImVec2(btnEnd.x, btnEnd.y - lift);
+
+                if (!active && anim > 0.001f) {
+                    drawSoftShadow(dl, drawMin, drawMax, 12.0f,
+                                   IM_COL32(15, 23, 42, (int)(70 * anim)),
+                                   ImVec2(0.0f, 4.0f + 8.0f * anim));
+                    int alpha = (int)(anim * 200.0f);
                     ImU32 hoverBg = IM_COL32((int)(ColBgHover.x * 255), (int)(ColBgHover.y * 255),
                                              (int)(ColBgHover.z * 255), alpha);
-                    dl->AddRectFilled(btnPos, btnEnd, hoverBg, 12.0f);
+                    dl->AddRectFilled(drawMin, drawMax, hoverBg, 12.0f);
+                    int glow = (int)(anim * 28.0f);
+                    dl->AddRectFilled(drawMin, drawMax,
+                                      IM_COL32(167, 139, 250, glow), 12.0f);
+                    dl->AddLine(ImVec2(drawMin.x + 8.0f, drawMin.y + 1.0f),
+                                ImVec2(drawMax.x - 8.0f, drawMin.y + 1.0f),
+                                IM_COL32(255, 255, 255, (int)(90 * anim)), 1.0f);
+                    dl->AddLine(ImVec2(drawMin.x + 8.0f, drawMax.y - 1.0f),
+                                ImVec2(drawMax.x - 8.0f, drawMax.y - 1.0f),
+                                IM_COL32(0, 0, 0, (int)(55 * anim)), 1.0f);
+                }
+
+                char pkBuf[32];
+                std::snprintf(pkBuf, sizeof(pkBuf), "##navPulse%d", i);
+                ImGuiID pulseKey = ImGui::GetID(pkBuf);
+                float pulseStart = navStore->GetFloat(pulseKey, -1.0f);
+                float now = (float)ImGui::GetTime();
+                float pulseDur = 0.45f;
+                if (pulseStart > 0.0f) {
+                    float pe = now - pulseStart;
+                    if (pe >= 0.0f && pe < pulseDur) {
+                        float pt = pe / pulseDur;
+                        float radius = 10.0f + pt * 70.0f;
+                        int   a      = (int)((1.0f - pt) * (1.0f - pt) * 110.0f);
+                        ImVec2 c     = ImVec2(btnPos.x + 22.0f, btnPos.y + btnH * 0.5f - lift);
+                        dl->AddCircle(c, radius,
+                                      IM_COL32(167, 139, 250, a), 32, 2.0f);
+                        dl->AddCircle(c, radius * 0.6f,
+                                      IM_COL32(255, 255, 255, a / 2), 32, 1.0f);
+                    } else if (pe >= pulseDur) {
+                        navStore->SetFloat(pulseKey, -1.0f);
+                    }
                 }
 
                 ImU32 iconCol = active ? IM_COL32(255, 255, 255, 255)
                                        : (hovered ? u32(ColAccent)
                                                   : u32(ColTextMuted));
-                drawNavIcon(dl, ImVec2(btnPos.x + 22.0f, btnPos.y + btnH * 0.5f), nav.item, iconCol);
+                drawNavIcon(dl, ImVec2(btnPos.x + 22.0f, btnPos.y + btnH * 0.5f - lift),
+                            nav.item, iconCol);
 
                 if (expanded) {
-                    ImGui::SetCursorScreenPos(ImVec2(btnPos.x + 42.0f, btnPos.y + 12.0f));
+                    ImGui::SetCursorScreenPos(ImVec2(btnPos.x + 42.0f, btnPos.y + 12.0f - lift));
                     ImGui::PushFont(fontUiSemibold());
                     ImVec4 lblCol = active ? ImVec4(1.0f, 1.0f, 1.0f, 1.0f)
                                            : (hovered ? ColTextPrimary : ColTextSecondary);
@@ -301,9 +376,10 @@ namespace ui {
 
                 if (clicked) {
                     uiState.activeNavItem = nav.item;
+                    navStore->SetFloat(pulseKey, now);
                 }
 
-                ImGui::SetCursorScreenPos(ImVec2(btnPos.x, btnPos.y + btnH + 6.0f));
+                ImGui::SetCursorScreenPos(ImVec2(btnPos.x, btnPos.y + btnH + NAV_BTN_GAP));
             }
 
             int rootCount = static_cast<int>(logic::rootTaskIds(store).size());
@@ -452,42 +528,36 @@ namespace ui {
 
         void renderMetricCard(const char* id, int value, const char* label,
                               const char* sub, ImU32 accent, float width) {
-            ImGui::PushStyleColor(ImGuiCol_ChildBg, ColBgCard);
-            ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 18.0f);
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-            ImGui::BeginChild(id, ImVec2(width, 104.0f), true);
-
+            ImVec2 origin = ImGui::GetCursorScreenPos();
+            ImVec2 min    = origin;
+            ImVec2 max    = ImVec2(min.x + width, min.y + 104.0f);
+            CardVisual cv = drawCardChrome(id, min, max, 18.0f, 6.0f);
             ImDrawList* dl = ImGui::GetWindowDrawList();
-            ImVec2 min = ImGui::GetWindowPos();
-            ImVec2 max = ImVec2(min.x + width, min.y + 104.0f);
-            drawSoftShadow(dl, min, max, 18.0f);
-            dl->AddRectFilled(min, max, cardBgU32(), 18.0f);
-            dl->AddRect(min, max, cardBorderU32(), 18.0f);
-            dl->AddRectFilled(ImVec2(min.x + 18.0f, min.y + 18.0f),
-                              ImVec2(min.x + 58.0f, min.y + 58.0f),
+
+            dl->AddRectFilled(ImVec2(cv.drawMin.x + 18.0f, cv.drawMin.y + 18.0f),
+                              ImVec2(cv.drawMin.x + 58.0f, cv.drawMin.y + 58.0f),
                               IM_COL32((accent >> IM_COL32_R_SHIFT) & 255,
                                        (accent >> IM_COL32_G_SHIFT) & 255,
                                        (accent >> IM_COL32_B_SHIFT) & 255, 20), 12.0f);
-            dl->AddCircleFilled(ImVec2(min.x + 38.0f, min.y + 38.0f), 6.0f, accent);
+            dl->AddCircleFilled(ImVec2(cv.drawMin.x + 38.0f, cv.drawMin.y + 38.0f), 6.0f, accent);
 
-            ImGui::PushTextWrapPos(width - 16.0f);
-            ImGui::SetCursorPos(ImVec2(78.0f, 14.0f));
+            ImGui::PushTextWrapPos(cv.drawMin.x + width - 16.0f);
+            ImGui::SetCursorScreenPos(ImVec2(cv.drawMin.x + 78.0f, cv.drawMin.y + 14.0f));
             ImGui::PushFont(fontDisplay());
             ImGui::TextColored(ColTextPrimary, "%d", value);
             ImGui::PopFont();
-            ImGui::SetCursorPos(ImVec2(78.0f, 54.0f));
+            ImGui::SetCursorScreenPos(ImVec2(cv.drawMin.x + 78.0f, cv.drawMin.y + 54.0f));
             ImGui::TextColored(ColTextMuted, "%s", label);
             if (sub != nullptr && sub[0] != '\0') {
-                ImGui::SetCursorPos(ImVec2(78.0f, 74.0f));
+                ImGui::SetCursorScreenPos(ImVec2(cv.drawMin.x + 78.0f, cv.drawMin.y + 74.0f));
                 ImGui::PushFont(fontUiSemibold());
                 ImGui::TextColored(ImGui::ColorConvertU32ToFloat4(accent), "%s", sub);
                 ImGui::PopFont();
             }
             ImGui::PopTextWrapPos();
 
-            ImGui::EndChild();
-            ImGui::PopStyleVar(2);
-            ImGui::PopStyleColor();
+            ImGui::SetCursorScreenPos(min);
+            ImGui::Dummy(ImVec2(width, 104.0f));
         }
 
         void renderOverviewTaskCard(const data::Task& task, UiState& uiState, float width) {
@@ -498,23 +568,17 @@ namespace ui {
             ImU32 accent = urgencyToImU32(pc);
             char id[32];
             std::snprintf(id, sizeof(id), "##overviewTask%d", task.id);
-            bool hovered = ImGui::IsMouseHoveringRect(min, max);
-            float hoverT = animateHover(id, hovered, 0.18f);
 
-            drawSoftShadow(dl, min, max, 18.0f,
-                           hovered ? IM_COL32(15, 23, 42, 20) : IM_COL32(15, 23, 42, 12),
-                           ImVec2(0.0f, 6.0f + 2.0f * hoverT));
-            dl->AddRectFilled(min, max, cardBgU32(), 18.0f);
-            dl->AddRect(min, max,
-                        uiState.selectedTaskId == task.id ? u32(ColAccent)
-                                                          : hovered ? u32(ColBorderStrong)
-                                                          : cardBorderU32(),
-                        18.0f, 0, 1.3f);
-            dl->AddRectFilled(ImVec2(min.x + 18.0f, min.y + 18.0f),
-                              ImVec2(min.x + 22.0f, max.y - 18.0f), accent, 99.0f);
+            CardVisual cv = drawCardChrome(id, min, max, 18.0f, 7.0f);
+            if (uiState.selectedTaskId == task.id) {
+                dl->AddRect(cv.drawMin, cv.drawMax, u32(ColAccent), 18.0f, 0, 1.6f);
+            }
+            dl->AddRectFilled(ImVec2(cv.drawMin.x + 18.0f, cv.drawMin.y + 18.0f),
+                              ImVec2(cv.drawMin.x + 22.0f, cv.drawMax.y - 18.0f),
+                              accent, 99.0f);
 
-            ImGui::PushTextWrapPos(max.x - 18.0f);
-            ImGui::SetCursorScreenPos(ImVec2(min.x + 34.0f, min.y + 18.0f));
+            ImGui::PushTextWrapPos(cv.drawMax.x - 18.0f);
+            ImGui::SetCursorScreenPos(ImVec2(cv.drawMin.x + 34.0f, cv.drawMin.y + 18.0f));
             ImGui::PushFont(fontHeading());
             ImGui::TextColored(ColTextPrimary, "%s", task.title.c_str());
             ImGui::PopFont();
@@ -523,11 +587,11 @@ namespace ui {
             if (note.size() > 72) {
                 note = note.substr(0, 72) + "...";
             }
-            ImGui::SetCursorScreenPos(ImVec2(min.x + 34.0f, min.y + 50.0f));
+            ImGui::SetCursorScreenPos(ImVec2(cv.drawMin.x + 34.0f, cv.drawMin.y + 50.0f));
             ImGui::TextColored(ColTextFaint, "%s", note.c_str());
             ImGui::PopTextWrapPos();
 
-            ImGui::SetCursorScreenPos(ImVec2(min.x + 34.0f, max.y - 34.0f));
+            ImGui::SetCursorScreenPos(ImVec2(cv.drawMin.x + 34.0f, cv.drawMax.y - 34.0f));
             BadgeStyle sb = statusBadgeStyle(task.status);
             renderBadge(sb.label, sb.bg, sb.text, true, sb.dot);
             ImGui::SameLine(0, 8.0f);
@@ -535,7 +599,7 @@ namespace ui {
             renderBadge(pb.label, pb.bg, pb.text, false, {});
 
             std::string due = logic::formatDate(task.deadline);
-            ImGui::SetCursorScreenPos(ImVec2(max.x - 94.0f, max.y - 32.0f));
+            ImGui::SetCursorScreenPos(ImVec2(cv.drawMax.x - 94.0f, cv.drawMax.y - 32.0f));
             ImGui::PushFont(fontUiSemibold());
             ImGui::TextColored(ColTextFaint, "%s", due.empty() ? tr(K_OV_NO_DUE) : due.c_str());
             ImGui::PopFont();
@@ -674,29 +738,22 @@ namespace ui {
                     ImVec2 max = ImVec2(min.x + sideContentW, min.y + 72.0f);
                     char id[32];
                     std::snprintf(id, sizeof(id), "##rootCard%d", root->id);
-                    bool hovered = ImGui::IsMouseHoveringRect(min, max);
-                    float hoverT = animateHover(id, hovered, 0.18f);
-                    drawSoftShadow(ImGui::GetWindowDrawList(), min, max, 18.0f,
-                                   hovered ? IM_COL32(15, 23, 42, 20) : IM_COL32(15, 23, 42, 12),
-                                   ImVec2(0.0f, 5.0f + 2.0f * hoverT));
-                    ImGui::GetWindowDrawList()->AddRectFilled(min, max, cardBgU32(), 18.0f);
-                    ImGui::GetWindowDrawList()->AddRect(min, max,
-                                                        hovered ? u32(ColBorderStrong) : cardBorderU32(),
-                                                        18.0f);
+                    CardVisual cv = drawCardChrome(id, min, max, 18.0f, 6.0f);
 
                     UrgencyColor pc = colorForPriority(root->priority);
                     ImU32 accent = urgencyToImU32(pc);
-                    ImGui::GetWindowDrawList()->AddCircleFilled(ImVec2(min.x + 18.0f, min.y + 24.0f), 4.0f, accent);
-                    ImGui::PushTextWrapPos(max.x - 44.0f);
-                    ImGui::SetCursorScreenPos(ImVec2(min.x + 32.0f, min.y + 15.0f));
+                    ImGui::GetWindowDrawList()->AddCircleFilled(
+                        ImVec2(cv.drawMin.x + 18.0f, cv.drawMin.y + 24.0f), 4.0f, accent);
+                    ImGui::PushTextWrapPos(cv.drawMax.x - 44.0f);
+                    ImGui::SetCursorScreenPos(ImVec2(cv.drawMin.x + 32.0f, cv.drawMin.y + 15.0f));
                     ImGui::PushFont(fontUiSemibold());
                     ImGui::TextColored(ColTextSecondary, "%s", root->title.c_str());
                     ImGui::PopFont();
 
                     float completion = logic::calculateWeightedCompletion(store, root->id);
-                    renderProgressRing(ImVec2(max.x - 26.0f, min.y + 27.0f), 12.0f, 3.0f,
+                    renderProgressRing(ImVec2(cv.drawMax.x - 26.0f, cv.drawMin.y + 27.0f), 12.0f, 3.0f,
                                        completion * 100.0f, accent);
-                    ImGui::SetCursorScreenPos(ImVec2(min.x + 32.0f, min.y + 40.0f));
+                    ImGui::SetCursorScreenPos(ImVec2(cv.drawMin.x + 32.0f, cv.drawMin.y + 40.0f));
                     ImGui::TextColored(ColTextFaint, tr(K_OV_SUBTASKS_DONE_FMT),
                                        logic::countDescendants(store, root->id),
                                        completion * 100.0f);
@@ -836,8 +893,25 @@ namespace ui {
             float contentW = vp->WorkSize.x - sidebarW;
             float contentH = vp->WorkSize.y - menuBarH - TOPBAR_H - STATUSBAR_H;
 
-            ImGui::SetNextWindowPos(ImVec2(contentX, contentY));
+            static NavItem s_prevNav    = uiState.activeNavItem;
+            static double  s_switchTime = ImGui::GetTime() - 1.0;
+            static int     s_slideDir   = 1;
+            if (s_prevNav != uiState.activeNavItem) {
+                s_slideDir   = (int)uiState.activeNavItem >= (int)s_prevNav ? 1 : -1;
+                s_prevNav    = uiState.activeNavItem;
+                s_switchTime = ImGui::GetTime();
+            }
+            double swElapsed = ImGui::GetTime() - s_switchTime;
+            float  swT       = (float)(swElapsed / 0.26);
+            if (swT < 0.0f) swT = 0.0f;
+            if (swT > 1.0f) swT = 1.0f;
+            float swEase     = 1.0f - (1.0f - swT) * (1.0f - swT) * (1.0f - swT);
+            float swAlpha    = 0.25f + 0.75f * swEase;
+            float swOffsetY  = (1.0f - swEase) * 32.0f * (float)s_slideDir;
+
+            ImGui::SetNextWindowPos(ImVec2(contentX, contentY + swOffsetY));
             ImGui::SetNextWindowSize(ImVec2(contentW, contentH));
+            ImGui::PushStyleVar(ImGuiStyleVar_Alpha, swAlpha);
 
             ImGuiWindowFlags flags =
                 ImGuiWindowFlags_NoDecoration |
@@ -852,7 +926,7 @@ namespace ui {
             if (!ImGui::Begin("##DataForgeShell", nullptr, flags)) {
                 ImGui::End();
                 ImGui::PopStyleColor();
-                ImGui::PopStyleVar();
+                ImGui::PopStyleVar(2);
                 return;
             }
 
@@ -896,7 +970,7 @@ namespace ui {
 
             ImGui::End();
             ImGui::PopStyleColor();
-            ImGui::PopStyleVar();
+            ImGui::PopStyleVar(2);
         }
 
     }

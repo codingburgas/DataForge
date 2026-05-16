@@ -117,4 +117,19 @@ namespace ui {
 
     float animateHover(const char* id, bool hovered, float duration = 0.15f);
 
+    struct CardVisual {
+        ImVec2 drawMin;
+        ImVec2 drawMax;
+        float  hoverT;
+        float  lift;
+        bool   hovered;
+    };
+
+    // Hover-detects, animates, draws shadow + fill + border + top bevel for a
+    // card-shaped region. Returns the lifted draw rect so callers position
+    // content via SetCursorScreenPos(drawMin + offset).
+    CardVisual drawCardChrome(const char* id, ImVec2 min, ImVec2 max,
+                              float rounding = 18.0f,
+                              float maxLift = 6.0f);
+
 }

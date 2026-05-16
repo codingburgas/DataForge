@@ -656,6 +656,50 @@ namespace ui {
         return pressed;
     }
 
+    CardVisual drawCardChrome(const char* id, ImVec2 min, ImVec2 max,
+                              float rounding, float maxLift) {
+        CardVisual v{};
+        bool hovered  = ImGui::IsMouseHoveringRect(min, max);
+        float hoverT  = animateHover(id, hovered, 0.18f);
+        float lift    = hoverT * maxLift;
+        ImVec2 dMin   = ImVec2(min.x, min.y - lift);
+        ImVec2 dMax   = ImVec2(max.x, max.y - lift);
+
+        ImDrawList* dl = ImGui::GetWindowDrawList();
+        int   baseA   = 16;
+        int   addA    = (int)(46.0f * hoverT);
+        float yOff    = 6.0f + 12.0f * hoverT;
+        drawSoftShadow(dl, dMin, dMax, rounding,
+                       IM_COL32(15, 23, 42, baseA + addA),
+                       ImVec2(0.0f, yOff));
+        if (hoverT > 0.001f) {
+            int glow = (int)(28.0f * hoverT);
+            drawSoftShadow(dl, dMin, dMax, rounding,
+                           IM_COL32(124, 58, 237, glow),
+                           ImVec2(0.0f, yOff + 4.0f));
+        }
+        dl->AddRectFilled(dMin, dMax, cardBgU32(), rounding);
+        ImU32 borderCol = hovered ? ImGui::ColorConvertFloat4ToU32(ColBorderStrong)
+                                  : cardBorderU32();
+        dl->AddRect(dMin, dMax, borderCol, rounding);
+        int   bevelA  = (int)(60.0f + 90.0f * hoverT);
+        if (bevelA > 255) bevelA = 255;
+        dl->AddLine(ImVec2(dMin.x + 10.0f, dMin.y + 1.0f),
+                    ImVec2(dMax.x - 10.0f, dMin.y + 1.0f),
+                    IM_COL32(255, 255, 255, bevelA), 1.0f);
+        int botA = (int)(20.0f + 30.0f * hoverT);
+        dl->AddLine(ImVec2(dMin.x + 10.0f, dMax.y - 1.0f),
+                    ImVec2(dMax.x - 10.0f, dMax.y - 1.0f),
+                    IM_COL32(0, 0, 0, botA), 1.0f);
+
+        v.drawMin = dMin;
+        v.drawMax = dMax;
+        v.hoverT  = hoverT;
+        v.lift    = lift;
+        v.hovered = hovered;
+        return v;
+    }
+
     float animateHover(const char* id, bool hovered, float duration) {
         ImGuiStorage* s = ImGui::GetStateStorage();
         ImGuiID key = ImGui::GetID(id);

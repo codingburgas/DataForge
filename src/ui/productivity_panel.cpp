@@ -12,17 +12,17 @@ namespace ui {
         void renderStatChip(const char* label, const char* value, ImU32 accent, float width) {
             ImVec2 min = ImGui::GetCursorScreenPos();
             ImVec2 max = ImVec2(min.x + width, min.y + 96.0f);
+            char id[64];
+            std::snprintf(id, sizeof(id), "##prodChip_%s", label);
+            CardVisual cv = drawCardChrome(id, min, max, 18.0f, 5.0f);
             ImDrawList* dl = ImGui::GetWindowDrawList();
-            drawSoftShadow(dl, min, max, 18.0f);
-            dl->AddRectFilled(min, max, cardBgU32(), 18.0f);
-            dl->AddRect(min, max, cardBorderU32(), 18.0f);
-            dl->AddCircleFilled(ImVec2(min.x + 28.0f, min.y + 36.0f), 6.0f, accent);
+            dl->AddCircleFilled(ImVec2(cv.drawMin.x + 28.0f, cv.drawMin.y + 36.0f), 6.0f, accent);
 
-            ImGui::SetCursorScreenPos(ImVec2(min.x + 56.0f, min.y + 14.0f));
+            ImGui::SetCursorScreenPos(ImVec2(cv.drawMin.x + 56.0f, cv.drawMin.y + 14.0f));
             ImGui::PushFont(fontDisplay());
             ImGui::TextColored(ColTextPrimary, "%s", value);
             ImGui::PopFont();
-            ImGui::SetCursorScreenPos(ImVec2(min.x + 56.0f, min.y + 56.0f));
+            ImGui::SetCursorScreenPos(ImVec2(cv.drawMin.x + 56.0f, cv.drawMin.y + 56.0f));
             ImGui::TextColored(ColTextMuted, "%s", label);
 
             ImGui::SetCursorScreenPos(min);
@@ -40,12 +40,14 @@ namespace ui {
 
             ImVec2 origin = ImGui::GetCursorScreenPos();
             float cardH = 220.0f;
-            ImVec2 cardMin = origin;
-            ImVec2 cardMax = ImVec2(origin.x + width, origin.y + cardH);
+            ImVec2 cardMinHit = origin;
+            ImVec2 cardMaxHit = ImVec2(origin.x + width, origin.y + cardH);
+            char pid[96];
+            std::snprintf(pid, sizeof(pid), "##prodPie_%s", title);
+            CardVisual pieCv = drawCardChrome(pid, cardMinHit, cardMaxHit, 18.0f, 5.0f);
+            ImVec2 cardMin = pieCv.drawMin;
+            ImVec2 cardMax = pieCv.drawMax;
             ImDrawList* dl = ImGui::GetWindowDrawList();
-            drawSoftShadow(dl, cardMin, cardMax, 18.0f);
-            dl->AddRectFilled(cardMin, cardMax, cardBgU32(), 18.0f);
-            dl->AddRect(cardMin, cardMax, cardBorderU32(), 18.0f);
 
             ImGui::SetCursorScreenPos(ImVec2(cardMin.x + 16.0f, cardMin.y + 14.0f));
             ImGui::PushFont(fontUiSemibold());
@@ -198,30 +200,45 @@ namespace ui {
 
             ImVec2 min = ImGui::GetCursorScreenPos();
             ImVec2 max = ImVec2(min.x + badgeW, min.y + 86.0f);
+            char bid[96];
+            std::snprintf(bid, sizeof(bid), "##prodBadge_%s", id.c_str());
+            bool hovered = ImGui::IsMouseHoveringRect(min, max);
+            float hoverT = animateHover(bid, hovered, 0.18f);
+            float lift   = hoverT * 5.0f;
+            ImVec2 dMin  = ImVec2(min.x, min.y - lift);
+            ImVec2 dMax  = ImVec2(max.x, max.y - lift);
+
             ImDrawList* dl = ImGui::GetWindowDrawList();
-            dl->AddRectFilled(min, max,
+            drawSoftShadow(dl, dMin, dMax, 16.0f,
+                           IM_COL32(15, 23, 42, 14 + (int)(50.0f * hoverT)),
+                           ImVec2(0.0f, 5.0f + 10.0f * hoverT));
+            dl->AddRectFilled(dMin, dMax,
                               ImGui::ColorConvertFloat4ToU32(
                                   earned ? ColBgActive : ColBgCardSoft),
                               16.0f);
-            dl->AddRect(min, max,
+            dl->AddRect(dMin, dMax,
                         earned ? ImGui::ColorConvertFloat4ToU32(ColAccent)
-                               : cardBorderU32(),
+                               : (hovered ? ImGui::ColorConvertFloat4ToU32(ColBorderStrong)
+                                          : cardBorderU32()),
                         16.0f, 0, earned ? 1.6f : 1.0f);
+            dl->AddLine(ImVec2(dMin.x + 8.0f, dMin.y + 1.0f),
+                        ImVec2(dMax.x - 8.0f, dMin.y + 1.0f),
+                        IM_COL32(255, 255, 255, (int)(60 + 90 * hoverT)), 1.0f);
 
-            dl->AddCircleFilled(ImVec2(min.x + 26.0f, min.y + 30.0f), 12.0f,
+            dl->AddCircleFilled(ImVec2(dMin.x + 26.0f, dMin.y + 30.0f), 12.0f,
                                 earned ? ImGui::ColorConvertFloat4ToU32(ColAccent)
                                        : ImGui::ColorConvertFloat4ToU32(ColBorderStrong));
 
-            ImGui::SetCursorScreenPos(ImVec2(min.x + 50.0f, min.y + 14.0f));
+            ImGui::SetCursorScreenPos(ImVec2(dMin.x + 50.0f, dMin.y + 14.0f));
             ImGui::PushFont(fontUiSemibold());
             ImGui::TextColored(earned ? ColTextPrimary : ColTextMuted,
                                "%s", logic::badgeLabel(id));
             ImGui::PopFont();
-            ImGui::SetCursorScreenPos(ImVec2(min.x + 50.0f, min.y + 38.0f));
-            ImGui::PushTextWrapPos(max.x - 12.0f);
+            ImGui::SetCursorScreenPos(ImVec2(dMin.x + 50.0f, dMin.y + 38.0f));
+            ImGui::PushTextWrapPos(dMax.x - 12.0f);
             ImGui::TextColored(ColTextFaint, "%s", logic::badgeDescription(id));
             ImGui::PopTextWrapPos();
-            ImGui::SetCursorScreenPos(ImVec2(min.x + 50.0f, max.y - 22.0f));
+            ImGui::SetCursorScreenPos(ImVec2(dMin.x + 50.0f, dMax.y - 22.0f));
             ImGui::TextColored(earned ? HEX(0x059669) : ColTextFaint,
                                earned ? "Earned" : "Locked");
 
