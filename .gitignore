@@ -53,6 +53,31 @@ Generated\ Files/
 [Bb]uild[Ll]og.*
 *.trx
 
+# Per-Team Personal Files
+.claude/
+.claudeignore
+.cursorignore
+PROJECT-REQUIREMENTS.txt
+PROJECT.txt
+PROJECT-DETAILS.txt
+DESIGN.md
+CLAUDE.md
+design_handoff_dataforge
+design_handoff_dataforge/
+code_test_bg.md
+*.py
+test-scripts
+test-scripts/
+PLAN.md
+[Dd]imden/
+[Dd]imden
+[Dd]imden.txt
+[Dd]imden.md
+ClaudeDesign/
+ClaudeDesign
+__pycache__/
+*.pyc
+
 # NUnit
 *.VisualState.xml
 TestResult.xml
@@ -416,15 +441,3 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
-
-# Claude Code
-.claude/
-.claudeignore
-.cursorignore
-PROJECT-REQUIREMENTS.txt
-PROJECT.txt
-PROJECT-DETAILS.txt
-DESIGN.md
-CLAUDE.md
-design_handoff_dataforge
-design_handoff_dataforge/
